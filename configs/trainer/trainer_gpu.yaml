@@ -1,0 +1,6 @@
+defaults:
+  - trainer.yaml
+
+accelerator: gpu
+devices: 1
+max_epochs: 10

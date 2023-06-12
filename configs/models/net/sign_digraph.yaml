@@ -1,0 +1,7 @@
+defaults:
+  - mlp: mlp
+  - _self_
+
+_target_: models.net.sign_digraph.SignDiGraphNet
+mlp:
+  node_features: null # node_features + K(SIGN hops) * node_features

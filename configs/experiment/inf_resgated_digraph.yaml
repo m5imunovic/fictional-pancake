@@ -1,0 +1,23 @@
+# @package _global_
+
+# specify here default configuration
+# order of defaults determines the order in which configs override each other
+defaults:
+  - /graph: digraph
+  - override /models/net: resgated_${graph}
+  - override /datamodules: datamodules
+  - _self_
+
+# custom configs
+graph_type: ${graph.type}
+
+dataset_name: #
+
+ckpt_path: ${paths.model_dir}/digraph/checkpoints/last.ckpt
+
+loggers:
+  wandb:
+    name: ${graph_type}_inference_B${datamodules.batch_size}_L${models.net.num_layers}_FLossM
+    group: inference
+    tags: ["resgated_dg"]
+    offline: True

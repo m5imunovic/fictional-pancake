@@ -1,0 +1,7 @@
+defaults:
+  - _self_
+  # use relative path as dataset on same level as this file
+  - transform: transform_${graph}.yaml
+  - ./datasets/datasets.yaml@_here_
+
+_target_: data.dbg_datatransformer.DBGDataTransformer

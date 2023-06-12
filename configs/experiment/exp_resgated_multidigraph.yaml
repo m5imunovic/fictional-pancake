@@ -1,0 +1,31 @@
+# @package _global_
+
+# specify here default configuration
+# order of defaults determines the order in which configs override each other
+defaults:
+  - /graph: multidigraph
+  - override /models/net: resgated_${graph}
+  - override /datamodules: datamodules
+  - _self_
+
+# custom configs
+graph_type: ${graph.type}
+baseline: L${models.net.num_layers}_H${models.net.hidden_features}
+
+dataset_name: null
+
+trainer:
+  max_epochs: 5
+
+
+loggers:
+  wandb:
+    name: ${graph_type}_E${trainer.max_epochs}_${baseline}_FLossM
+    group: train
+    tags: ["resgated_mdg"]
+    offline: False
+    reinit: True
+
+model_output_path: ${paths.model_dir}/multidigraph/paper/baseline/${baseline}
+
+ckpt_path: #${model_output_path}/best_model.ckpt

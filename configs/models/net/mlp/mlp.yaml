@@ -1,0 +1,6 @@
+_target_: models.net.mlp.MLP
+num_layers: 5
+node_features: 4
+hidden_features: 256
+out_features: 1
+dropout: 0.2

@@ -1,0 +1,3 @@
+train_path: ${paths.dataset_dir}/random_species_medium_c1_01_21/train/${graph.type}
+test_path: ${paths.dataset_dir}/random_species_medium_c1_01_21/test/${graph.type}
+val_path: ${paths.dataset_dir}/random_species_medium_c1_01_21/val/${graph.type}

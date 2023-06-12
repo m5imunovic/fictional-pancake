@@ -1,0 +1,5 @@
+_target_: models.net.resgated_digraph.ResGatedDiGraphNet
+num_layers: 2
+node_features: 4
+hidden_features: 64
+batch_norm: False

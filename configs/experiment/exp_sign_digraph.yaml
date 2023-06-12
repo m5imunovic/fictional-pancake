@@ -1,0 +1,28 @@
+# @package _global_
+
+# specify here default configuration
+# order of defaults determines the order in which configs override each other
+defaults:
+  - graph: digraph
+  - override /models/net: sign_${graph}
+  - override /datamodules: datamodules
+  - override /datamodules/transform: transform_sign_${graph}
+  - _self_
+
+# custom configs
+graph_type: ${graph.type}
+
+models:
+  net:
+    mlp:
+      node_features: 30
+
+trainer:
+  max_epochs: 150
+
+loggers:
+  wandb:
+    name: ${graph_type}_E${trainer.max_epochs}_B${datamodules.batch_size}_L${models.net.mlp.num_layers}_FLossM
+    group: dbg
+    tags: ["sign", "K=4"]
+    offline: False

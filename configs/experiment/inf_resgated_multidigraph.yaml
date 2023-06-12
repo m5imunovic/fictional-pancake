@@ -1,0 +1,27 @@
+# @package _global_
+
+# specify here default configuration
+# order of defaults determines the order in which configs override each other
+defaults:
+  - /graph: multidigraph
+  - override /models/net: resgated_${graph}
+  - override /datamodules: datamodules
+  - _self_
+
+# custom configs
+graph_type: ${graph.type}
+
+dataset_name: null
+baseline: L${models.net.num_layers}_H${models.net.hidden_features} 
+
+ckpt_path: ${paths.model_dir}/multidigraph/paper/baseline/${baseline}/best_model.ckpt #checkpoints/last.ckpt
+
+models:
+  threshold: 0.7
+
+loggers:
+  wandb:
+    name: ${graph_type}_inference_${dataset_name}
+    group: inference_${baseline}_T${models.threshold}
+    tags: ["resgated_mdg"]
+    offline: False

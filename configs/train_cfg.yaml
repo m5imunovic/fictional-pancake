@@ -1,0 +1,29 @@
+# @package _global_
+
+# specify here default configuration
+# order of defaults determines the order in which configs override each other
+defaults:
+  - _self_
+  - hydra: hydra.yaml
+  - loggers: loggers.yaml
+  - paths: paths.yaml
+  - callbacks: callbacks.yaml
+  - datamodules: #
+  - models: models.yaml
+  - trainer: trainer_gpu.yaml
+  - experiment: null
+  #- override models/net: resgated_multidigraph
+# task name, used as output directory path
+task_name: "train"
+
+# use False to skip if we should only do the testing
+train: True
+
+# evaluation on the test data
+test: True
+
+# we can provide previously trained model here
+ckpt_path: null
+
+# custom configs
+graph_type: #
