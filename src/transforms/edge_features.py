@@ -1,9 +1,7 @@
 from typing import List
 
-import torch
 from torch_geometric.data import Data
 from torch_geometric.transforms import BaseTransform
-from torch_geometric.utils.sparse import to_torch_coo_tensor 
 
 
 class NormalizeEdgeFeatures(BaseTransform):
@@ -21,7 +19,7 @@ class NormalizeEdgeFeatures(BaseTransform):
         for store in data.stores:
             for key, value in store.items(*self.attrs):
                 if value.numel() > 0:
-                    max_val, _  = value.max(dim=0)
+                    max_val, _ = value.max(dim=0)
                     value.div_(max_val)
                 store[key] = value
 

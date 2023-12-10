@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from torch import Tensor
-from torch_geometric.nn.conv import MessagePassing, PDNConv
+from torch_geometric.nn.conv import MessagePassing
 
 
 class ResGatedMultiDiGraphNet(nn.Module):
