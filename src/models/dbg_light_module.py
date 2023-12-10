@@ -1,8 +1,16 @@
 from typing import Optional
+
 import pytorch_lightning as pl
 import torch
 import torch.nn as nn
-from torchmetrics import Accuracy, ConfusionMatrix, Precision, Recall, F1Score, PrecisionRecallCurve
+from torchmetrics import (
+    Accuracy,
+    ConfusionMatrix,
+    F1Score,
+    Precision,
+    PrecisionRecallCurve,
+    Recall,
+)
 
 
 class DBGLightningModule(pl.LightningModule):
@@ -103,10 +111,6 @@ class DBGLightningModule(pl.LightningModule):
 
     def test_step(self, batch, batch_idx, dataloader_idx=0):
         scores, expected_scores = self.common_step(batch, batch_idx, dataloader_idx)
-        with open("/tmp/scores.pt", "wb") as f:
-            torch.save(scores, f)
-        with open("/tmp/expected_scores.pt", "wb") as f:
-            torch.save(expected_scores, f)
         scores = torch.sigmoid(scores)
         self.recall(scores, expected_scores.int())
         self.binary_precision(scores, expected_scores.int())
@@ -121,7 +125,12 @@ class DBGLightningModule(pl.LightningModule):
     def on_test_end(self):
         if hasattr(self.logger, "log_table"):
             columns = ["accuracy", "precision", "recall", "f1score"]
-            data = [self.test_acc.compute(), self.binary_precision.compute(), self.recall.compute(), self.f1score.compute()]
+            data = [
+                self.test_acc.compute(),
+                self.binary_precision.compute(),
+                self.recall.compute(),
+                self.f1score.compute(),
+            ]
             data = [[entry.item() for entry in data]]
             self.logger.log_table(
                 "test/metrics",

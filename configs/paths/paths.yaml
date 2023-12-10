@@ -5,7 +5,7 @@
 root_dir: ${oc.env:PROJECT_ROOT}
 
 # path to data directory
-data_dir: /data/exp
+data_dir: /data/
 # path to datasets
 dataset_dir: ${paths.data_dir}/datasets
 # path to saved models (e.g. for inference)

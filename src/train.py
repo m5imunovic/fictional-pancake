@@ -42,7 +42,7 @@ def train(cfg: DictConfig) -> None:
         if ckpt_path is not None:
             output_dir = Path(cfg.model_output_path)
             output_dir.mkdir(exist_ok=True)
-            output_file_path = output_dir / "best_model.ckpt" 
+            output_file_path = output_dir / "best_model.ckpt"
             log.info(f"Saving model {ckpt_path} to {output_file_path} ...")
             shutil.copy(ckpt_path, output_file_path)
 

@@ -1,3 +1,4 @@
+#!/bin/bash
 PROJECT_ROOT=./ python src/transform.py graph=multidigraph species_name=chr_1_real_04_30
 PROJECT_ROOT=./ python src/transform.py graph=multidigraph species_name=chr_2_real_04_30
 PROJECT_ROOT=./ python src/transform.py graph=multidigraph species_name=chr_3_real_04_30

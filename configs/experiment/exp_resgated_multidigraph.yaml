@@ -17,7 +17,6 @@ dataset_name: null
 trainer:
   max_epochs: 5
 
-
 loggers:
   wandb:
     name: ${graph_type}_E${trainer.max_epochs}_${baseline}_FLossM

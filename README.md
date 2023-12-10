@@ -2,16 +2,16 @@
 
 # Installation
 
-We recommend the usage of mamba for setting up Python environment:
+We recommend the usage of mambaforge for setting up Python environment:
 
-```bash
+https://github.com/conda-forge/miniforge#mambaforge
+
+```Bash
 ## Install conda
-conda install mamba -n base -c conda-forge
-conda update mamba -c conda-forge
 mamba init
 
 ## Create new environment (named menv)
-mamba create env --file=environment.yaml
+mamba env create --file=environment.yaml
 mamba activate menv
 ```
 

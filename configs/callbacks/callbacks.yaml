@@ -1,5 +1,5 @@
 defaults:
   - model_ckpt.yaml
   - progress_bar.yaml
-#  - early_stopping.yaml
+  #  - early_stopping.yaml
   - _self_
