@@ -17,12 +17,20 @@ def save_dir_helper(save_dir: Optional[str], suffix: str) -> Optional[str]:
     return new_save_dir
 
 
+def path_helper(path_specialized: Path, path_default: Path, path_descriptor: str) -> Path:
+    if path_specialized is None:
+        assert "*" in str(path_default), "Expected special character * in the string"
+        return Path(str(path_default).replace("*", path_descriptor))
+    return path_specialized
+
+
 class DBGClusterDataModule(pl.LightningDataModule):
     def __init__(
         self,
-        train_path: Path,
-        val_path: Path,
-        test_path: Path,
+        train_path: Optional[Path] = None,
+        val_path: Optional[Path] = None,
+        test_path: Optional[Path] = None,
+        dataset_path: Optional[Path] = None,
         transform: T.Compose = None,
         batch_size: int = 1,
         num_workers: int = 0,
@@ -34,7 +42,7 @@ class DBGClusterDataModule(pl.LightningDataModule):
 
         self.save_hyperparameters(logger=False)
 
-    def setup_dataloader(self, path: Path, stage: str) -> List[DataLoader]:
+    def _setup_dataloader(self, path: Path, stage: str) -> List[DataLoader]:
         dataset = DBGDataset(root=path, transform=self.hparams.transform)
         save_dir = save_dir_helper(self.hparams.save_dir, suffix=stage)
         cluster_data = [
@@ -53,20 +61,15 @@ class DBGClusterDataModule(pl.LightningDataModule):
             for cluster in cluster_data
         ]
 
-    @staticmethod
-    def path_helper(path_specialized: Path, path_default: Path, path_descriptor: str) -> Path:
-        if path_specialized is None:
-            return Path(str(path_default).replace("*", path_descriptor))
-        return path_specialized
+    def common_dataloader(self, stage: str) -> List[DataLoader]:
+        path = path_helper(self.hparams.dataset_path, self.hparams.dataset_path, stage)
+        return self._setup_dataloader(path, stage)
 
     def train_dataloader(self) -> List[DataLoader]:
-        path = self.path_helper(self.hparams.train_path, self.hparams.dataset_path, "train")
-        return self.setup_dataloader(path, "train")
+        return self.common_dataloader("train")
 
     def val_dataloader(self) -> List[DataLoader]:
-        path = self.path_helper(self.hparams.val_path, self.hparams.dataset_path, "val")
-        return self.setup_dataloader(path, "val")
+        return self.common_dataloader("val")
 
     def test_dataloader(self) -> List[DataLoader]:
-        path = self.path_helper(self.hparams.test_path, self.hparams.dataset_path, "test")
-        return self.setup_dataloader(path, "test")
+        return self.common_dataloader("test")
