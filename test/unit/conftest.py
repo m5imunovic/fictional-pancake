@@ -27,7 +27,7 @@ def test_data_path() -> Path:
 
 @pytest.fixture
 def random_species_data_path(test_data_path) -> Path:
-    return test_data_path / "random_species_10_13"
+    return test_data_path / "random_species_30000_11_06"
 
 
 @pytest.fixture

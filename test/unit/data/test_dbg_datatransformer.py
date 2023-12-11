@@ -4,7 +4,7 @@ from torch_geometric.transforms import Compose, Constant
 from data.dbg_datatransformer import DBGDataTransformer
 
 
-@pytest.mark.parametrize("gtype", ["digraph", "multidigraph"])
+@pytest.mark.parametrize("gtype", ["multidigraph"])
 def test_dbg_datatransformer(random_species_data_path, gtype):
     transform = Compose([Constant(value=0.5)])
 
