@@ -21,7 +21,7 @@ class DBGDataset(Dataset):
         return [file_parent_path / filename for filename in filelist_relative]
 
     @property
-    def raw_file_names(self) -> Union[str, List[str]]:
+    def raw_file_names(self) -> List[str]:
         return self._raw_file_names
 
     @cached_property
@@ -34,7 +34,7 @@ class DBGDataset(Dataset):
         return [file_parent_path / filename for filename in filelist_relative]
 
     @property
-    def processed_file_names(self) -> Union[str, List[str]]:
+    def processed_file_names(self) -> List[str]:
         return self._processed_file_names
 
     @property
@@ -49,14 +49,12 @@ class DBGDataset(Dataset):
     def transformed_file_names(self) -> Union[str, List[str]]:
         return self._transformed_file_names
 
-    @typechecked
     def len(self) -> int:
         if len(self.transformed_file_names) > 0:
             return len(self.transformed_file_names)
 
         return len(self.processed_file_names)
 
-    @typechecked
     def get(self, idx) -> Data:
         if len(self.transformed_file_names) > 0:
             data = torch.load(self.transformed_file_names[idx])
