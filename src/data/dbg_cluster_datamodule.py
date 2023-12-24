@@ -45,9 +45,10 @@ class DBGClusterDataModule(pl.LightningDataModule):
     def _setup_dataloader(self, path: Path, stage: str) -> List[DataLoader]:
         dataset = DBGDataset(root=path, transform=self.hparams.transform)
         save_dir = save_dir_helper(self.hparams.save_dir, suffix=stage)
+        to_undirected = T.ToUndirected()
         cluster_data = [
             ClusterData(
-                data=dataset[idx],
+                data=to_undirected(dataset[idx]),
                 num_parts=self.hparams.num_parts,
                 recursive=self.hparams.recursive,
                 save_dir=save_dir_helper(save_dir, str(idx)),
@@ -61,15 +62,15 @@ class DBGClusterDataModule(pl.LightningDataModule):
             for cluster in cluster_data
         ]
 
-    def common_dataloader(self, stage: str) -> List[DataLoader]:
-        path = path_helper(self.hparams.dataset_path, self.hparams.dataset_path, stage)
+    def common_dataloader(self, path: str, stage: str) -> List[DataLoader]:
+        path = path_helper(path, self.hparams.dataset_path, stage)
         return self._setup_dataloader(path, stage)
 
     def train_dataloader(self) -> List[DataLoader]:
-        return self.common_dataloader("train")
+        return self.common_dataloader(self.hparams.train_path, "train")
 
     def val_dataloader(self) -> List[DataLoader]:
-        return self.common_dataloader("val")
+        return self.common_dataloader(self.hparams.val_path, "val")
 
     def test_dataloader(self) -> List[DataLoader]:
-        return self.common_dataloader("test")
+        return self.common_dataloader(self.hparams.test_path, "test")
