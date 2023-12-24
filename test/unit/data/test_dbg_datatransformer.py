@@ -5,13 +5,13 @@ from data.dbg_datatransformer import DBGDataTransformer
 
 
 @pytest.mark.parametrize("gtype", ["multidigraph"])
-def test_dbg_datatransformer(random_species_data_path, gtype):
+def test_dbg_datatransformer(rs_20000_data_path, gtype):
     transform = Compose([Constant(value=0.5)])
 
     transformer = DBGDataTransformer(
-        train_path=random_species_data_path / "train" / gtype,
-        val_path=random_species_data_path / "val" / gtype,
-        test_path=random_species_data_path / "test" / gtype,
+        train_path=rs_20000_data_path / "train" / gtype,
+        val_path=rs_20000_data_path / "val" / gtype,
+        test_path=rs_20000_data_path / "test" / gtype,
         transform=transform,
     )
 

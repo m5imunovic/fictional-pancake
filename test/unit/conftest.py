@@ -26,8 +26,18 @@ def test_data_path() -> Path:
 
 
 @pytest.fixture
-def random_species_data_path(test_data_path) -> Path:
-    return test_data_path / "random_species_30000_11_06"
+def rs_20000_data_path(test_data_path) -> Path:
+    return test_data_path / "cluster/rs_20000"
+
+
+@pytest.fixture
+def rs_full_30000_data_path(test_data_path) -> Path:
+    return test_data_path / "rs_full_30000"
+
+
+@pytest.fixture
+def rs_20000_path(test_data_path) -> Path:
+    return test_data_path / "random_species_20000_12_15"
 
 
 @pytest.fixture
