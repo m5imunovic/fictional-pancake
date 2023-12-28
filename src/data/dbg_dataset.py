@@ -8,8 +8,9 @@ from typeguard import typechecked
 
 
 class DBGDataset(Dataset):
-    def __init__(self, root: Path, transform=None, pre_transform=None):
+    def __init__(self, root: Path, transform=None, pre_transform=None, clustered=False):
         super().__init__(str(root), transform, pre_transform)
+        self.clustered = clustered
 
     @cached_property
     def _raw_file_names(self) -> List[str]:
@@ -39,7 +40,10 @@ class DBGDataset(Dataset):
 
     @property
     def transformed_dir(self) -> Path:
-        return Path(self.root) / "transformed"
+        if self.clustered:
+            return Path(self.root) / "transformed" / "clustered"
+        else:
+            return Path(self.root) / "transformed"
 
     @cached_property
     def _transformed_file_names(self) -> List[str]:
