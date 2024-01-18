@@ -3,13 +3,13 @@ from typing import Optional
 import pytorch_lightning as pl
 import torch
 import torch.nn as nn
-from torchmetrics import (
-    Accuracy,
-    ConfusionMatrix,
-    F1Score,
-    Precision,
-    PrecisionRecallCurve,
-    Recall,
+from torchmetrics.classification import (
+    BinaryAccuracy,
+    BinaryConfusionMatrix,
+    BinaryF1Score,
+    BinaryPrecision,
+    BinaryPrecisionRecallCurve,
+    BinaryRecall,
 )
 
 
@@ -30,17 +30,17 @@ class DBGLightningModule(pl.LightningModule):
         self.batch_size = batch_size
 
         # training metrics
-        self.train_acc = Accuracy()
+        self.train_acc = BinaryAccuracy()
         # validation metrics
-        self.val_acc = Accuracy()
+        self.val_acc = BinaryAccuracy()
 
         # test metrics
-        self.test_acc = Accuracy(threshold=threshold)
-        self.binary_precision = Precision(threshold=threshold)
-        self.recall = Recall(threshold=threshold)
-        self.f1score = F1Score(threshold=threshold)
-        self.cm = ConfusionMatrix(num_classes=2, threshold=threshold)
-        self.pr_curve = PrecisionRecallCurve()
+        self.test_acc = BinaryAccuracy(threshold=threshold)
+        self.binary_precision = BinaryPrecision(threshold=threshold)
+        self.recall = BinaryRecall(threshold=threshold)
+        self.f1score = BinaryF1Score(threshold=threshold)
+        self.cm = BinaryConfusionMatrix(threshold=threshold)
+        self.pr_curve = BinaryPrecisionRecallCurve()
 
         self.scores_all = []
         self.expected_scores_all = []
