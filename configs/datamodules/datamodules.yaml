@@ -3,3 +3,4 @@ dataset_path: ${paths.dataset_dir}/${dataset_name}/*/${graph.type}
 transform: null # transform_${graph}.yaml
 batch_size: 1
 num_workers: 5
+clustered: False
