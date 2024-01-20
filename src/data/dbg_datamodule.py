@@ -18,6 +18,7 @@ class DBGDataModule(pl.LightningDataModule):
         transform: T.Compose = None,
         batch_size: int = 1,
         num_workers: int = 0,
+        clustered: bool = False,
     ):
         super().__init__()
 
@@ -35,7 +36,7 @@ class DBGDataModule(pl.LightningDataModule):
 
     def train_dataloader(self) -> DataLoader:
         path = self.path_helper(self.hparams.train_path, self.hparams.dataset_path, "train")
-        self.train_ds = DBGDataset(root=path, transform=self.hparams.transform)
+        self.train_ds = DBGDataset(root=path, transform=self.hparams.transform, clustered=self.hparams.clustered)
         return DataLoader(
             self.train_ds,
             batch_size=self.hparams.batch_size,
@@ -45,7 +46,7 @@ class DBGDataModule(pl.LightningDataModule):
 
     def val_dataloader(self) -> DataLoader:
         path = self.path_helper(self.hparams.val_path, self.hparams.dataset_path, "val")
-        self.val_ds = DBGDataset(root=path, transform=self.hparams.transform)
+        self.val_ds = DBGDataset(root=path, transform=self.hparams.transform, clustered=self.hparams.clustered)
         return DataLoader(
             self.val_ds,
             batch_size=self.hparams.batch_size,
