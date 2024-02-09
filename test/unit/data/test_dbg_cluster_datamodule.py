@@ -67,7 +67,7 @@ def test_full_train_dataloader(datamodule_full):
     assert isinstance(train_loader, list)
     assert all(isinstance(loader, DataLoader) for loader in train_loader)
 
-    assert len(train_loader) == 6
+    assert len(train_loader) == 24
 
     num_nodes = [[148, 150, 149, 149], [161, 159, 160, 160], [151, 148, 149, 150], [123, 125, 125, 123], [161, 159, 160, 160], [142, 143, 143, 142]]
     num_edges = [[398, 410, 398, 408], [442, 436, 438, 438], [412, 414, 416, 408], [328, 332, 332, 328], [438, 442, 444, 434], [392, 376, 396, 374]]
@@ -82,4 +82,4 @@ def test_full_val_dataloader(datamodule_full):
     assert isinstance(val_loader, list)
     assert all(isinstance(loader, DataLoader) for loader in val_loader)
 
-    assert len(val_loader) == 2
+    assert len(val_loader) == 8

@@ -1,5 +1,5 @@
 _target_: data.dbg_cluster_datamodule.DBGClusterDataModule
-dataset_path: ${paths.dataset_dir}/${dataset_name}/*/${graph.type}
+dataset_path: ${paths.dataset_dir}/${dataset_name}/
 transform: null # transform_${graph}.yaml
 save_dir: /tmp/metis
 batch_size: 1

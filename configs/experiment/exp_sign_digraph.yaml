@@ -22,7 +22,7 @@ trainer:
 
 loggers:
   wandb:
-    name: ${graph_type}_E${trainer.max_epochs}_B${datamodules.batch_size}_L${models.net.mlp.num_layers}_FLossM
+    name: E${trainer.max_epochs}_B${datamodules.batch_size}_L${models.net.mlp.num_layers}_FLossM
     group: dbg
     tags: ["sign", "K=4"]
     offline: False

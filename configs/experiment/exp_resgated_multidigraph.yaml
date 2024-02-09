@@ -19,7 +19,7 @@ trainer:
 
 loggers:
   wandb:
-    name: ${graph_type}_E${trainer.max_epochs}_${baseline}_FLossM
+    name: E${trainer.max_epochs}_${baseline}_FLossM
     group: train
     tags: ["resgated_mdg"]
     offline: True

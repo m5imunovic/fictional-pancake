@@ -2,10 +2,11 @@ from pathlib import Path
 from typing import List, Optional
 
 import pytorch_lightning as pl
+import torch
 import torch_geometric.transforms as T
-from torch_geometric.loader import ClusterData, ClusterLoader, DataLoader
+from torch_geometric.loader import ClusterData, DataLoader
 
-from data.dbg_dataset import DBGDataset
+from data.dbg_dataset import ClusteredDBGDataset
 
 
 def save_dir_helper(save_dir: Optional[str], suffix: str) -> Optional[str]:
@@ -36,6 +37,7 @@ class DBGClusterDataModule(pl.LightningDataModule):
         num_workers: int = 0,
         num_parts: int = 4,
         recursive: bool = True,
+        shuffle: bool = True,
         save_dir: Optional[str] = None,
     ):
         super().__init__()
@@ -43,24 +45,26 @@ class DBGClusterDataModule(pl.LightningDataModule):
         self.save_hyperparameters(logger=False)
 
     def _setup_dataloader(self, path: Path, stage: str) -> List[DataLoader]:
-        dataset = DBGDataset(root=path, transform=self.hparams.transform)
+        dataset = ClusteredDBGDataset(root=path, transform=self.hparams.transform)
         save_dir = save_dir_helper(self.hparams.save_dir, suffix=stage)
         to_undirected = T.ToUndirected()
-        cluster_data = [
-            ClusterData(
-                data=to_undirected(dataset[idx]),
+
+        partition_dataloaders = []
+        for idx in range(len(dataset)):
+            graph = dataset[idx]
+            graph.node_ids = torch.arange(graph.num_nodes)
+            cluster_dataset = ClusterData(
+                data=to_undirected(graph.clone()),
                 num_parts=self.hparams.num_parts,
                 recursive=self.hparams.recursive,
                 save_dir=save_dir_helper(save_dir, str(idx)),
             )
-            for idx in range(len(dataset))
-        ]
-        return [
-            ClusterLoader(
-                cluster_data=cluster, batch_size=self.hparams.batch_size, num_workers=self.hparams.num_workers
-            )
-            for cluster in cluster_data
-        ]
+            for data in cluster_dataset:
+                d = graph.subgraph(data.node_ids)
+                loader = DataLoader(d, batch_size=self.hparams.batch_size, num_workers=self.hparams.num_workers, shuffle=self.hparams.shuffle)
+                partition_dataloaders.append(loader)
+
+        return partition_dataloaders
 
     def common_dataloader(self, path: str, stage: str) -> List[DataLoader]:
         path = path_helper(path, self.hparams.dataset_path, stage)
