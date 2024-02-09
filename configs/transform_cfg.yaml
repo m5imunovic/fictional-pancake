@@ -12,7 +12,7 @@ defaults:
   - graph: null # specify using command line args [digraph | multidigraph]
   - _self_
 
-species_name: null
+dataset_name: null
 # task name, used as output directory path
 task_name: "transform"
 # custom configs

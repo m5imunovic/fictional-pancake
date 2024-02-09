@@ -46,7 +46,7 @@ class DBGDataTransformer(HyperparametersMixin):
             transform_path = self.get_transform_path(path)
             for i in range(len(ds)):
                 data = ds[i]
-                name = ds.processed_file_names[i].name
+                name = ds.raw_file_names[i].name
                 savepath = transform_path / name
                 torch.save(data, savepath)
                 print(f"Saved data to {savepath}")

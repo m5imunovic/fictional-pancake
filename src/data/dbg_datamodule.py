@@ -5,7 +5,7 @@ import pytorch_lightning as pl
 import torch_geometric.transforms as T
 from torch_geometric.loader import DataLoader
 
-from data.dbg_dataset import DBGDataset
+from data.dbg_dataset import ClusteredDBGDataset, DBGDataset
 
 
 class DBGDataModule(pl.LightningDataModule):
@@ -18,35 +18,35 @@ class DBGDataModule(pl.LightningDataModule):
         transform: T.Compose = None,
         batch_size: int = 1,
         num_workers: int = 0,
-        clustered: bool = False,
+        num_clusters: int = 0,
     ):
         super().__init__()
 
         self.save_hyperparameters(logger=False)
 
-        self.train_ds: Optional[DBGDataset] = None
-        self.val_ds: Optional[DBGDataset] = None
+        self.train_ds: Optional[ClusteredDBGDataset] = None
+        self.val_ds: Optional[ClusteredDBGDataset] = None
         self.test_ds: Optional[DBGDataset] = None
 
     @staticmethod
     def path_helper(path_specialized: Path, path_default: Path, path_descriptor: str) -> Path:
         if path_specialized is None:
-            return Path(str(path_default).replace("*", path_descriptor))
+            return Path(path_default) / path_descriptor
         return path_specialized
 
     def train_dataloader(self) -> DataLoader:
         path = self.path_helper(self.hparams.train_path, self.hparams.dataset_path, "train")
-        self.train_ds = DBGDataset(root=path, transform=self.hparams.transform, clustered=self.hparams.clustered)
+        self.train_ds = ClusteredDBGDataset(root=path, transform=self.hparams.transform, num_clusters=self.hparams.num_clusters)
         return DataLoader(
             self.train_ds,
             batch_size=self.hparams.batch_size,
             num_workers=self.hparams.num_workers,
-            shuffle=True,
+            shuffle=False,
         )
 
     def val_dataloader(self) -> DataLoader:
         path = self.path_helper(self.hparams.val_path, self.hparams.dataset_path, "val")
-        self.val_ds = DBGDataset(root=path, transform=self.hparams.transform, clustered=self.hparams.clustered)
+        self.val_ds = ClusteredDBGDataset(root=path, transform=self.hparams.transform, num_clusters=self.hparams.num_clusters)
         return DataLoader(
             self.val_ds,
             batch_size=self.hparams.batch_size,
