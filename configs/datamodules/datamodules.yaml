@@ -1,6 +1,9 @@
+defaults:
+  - _self_
+  - transform: transform_multidigraph.yaml
+
 _target_: data.dbg_datamodule.DBGDataModule
 dataset_path: ${paths.dataset_dir}/${dataset_name}
-transform: null # transform_${graph}.yaml
 batch_size: 1
-num_workers: 5
+num_workers: 4
 num_clusters: 8
