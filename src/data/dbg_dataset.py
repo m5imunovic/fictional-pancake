@@ -1,4 +1,5 @@
-import time
+import logging
+from datetime import datetime
 from functools import cached_property
 from pathlib import Path
 from typing import Callable
@@ -8,6 +9,9 @@ from torch.utils.data.dataset import Dataset
 import torch_geometric.transforms as T
 from torch_geometric.data import Data, Dataset
 from torch_geometric.loader import ClusterData
+
+
+logger = logging.getLogger(__name__)
 
 
 class ClusteredDBGDataset(Dataset):
@@ -29,7 +33,11 @@ class ClusteredDBGDataset(Dataset):
     
     def process(self):
         if self.num_clusters > 0:
+            logger.info(f"Partitioning dataset into {self.num_clusters} clusters")
+            start = datetime.now()
             partition_dataset2(Path(self.root), self.num_clusters)
+            duration = datetime.now() - start
+            logger.info(f"Partitioning finished after {duration}")
 
     @property
     def processed_file_names(self) -> list[Path]:

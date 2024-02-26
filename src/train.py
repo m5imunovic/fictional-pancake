@@ -1,6 +1,7 @@
 import shutil
+from datetime import datetime
 from pathlib import Path
-from typing import List, Optional
+from typing import Optional
 
 import hydra
 import pytorch_lightning as pl
@@ -19,12 +20,13 @@ def train(cfg: DictConfig) -> None:
     Args:
         cfg (DictConfig): Configurations for training
     """
+    start = datetime.now()
     log.info("Init data module...")
     datamodule: pl.LightningDataModule = hydra.utils.instantiate(cfg.datamodules)
     log.info("Init model...")
     model: pl.LightningModule = hydra.utils.instantiate(cfg.models)
     log.info("Init callbacks...")
-    callbacks: List[pl.Callback] = instantiate_component_list(cfg.callbacks)
+    callbacks: list[pl.Callback] = instantiate_component_list(cfg.callbacks)
     log.info("Init train loggers...")
     loggers = instantiate_component_list(cfg.loggers)
 
@@ -52,7 +54,8 @@ def train(cfg: DictConfig) -> None:
             log.warning("Could not find best checkpoint path! Using current weights for testing...")
         trainer.test(model=model, datamodule=datamodule, ckpt_path=ckpt_path)
 
-    log.info("Experiment finished.")
+    duration = datetime.now() - start
+    log.info(f"Training finished after {duration}")
     return None
 
 
