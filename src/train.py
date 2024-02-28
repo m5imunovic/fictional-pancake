@@ -5,6 +5,8 @@ from typing import Optional
 
 import hydra
 import pytorch_lightning as pl
+import wandb
+from hydra.core.hydra_config import HydraConfig
 from omegaconf import DictConfig, OmegaConf
 
 from utils.cfg_helpers import instantiate_component_list
@@ -12,6 +14,20 @@ from utils.logger import get_logger
 from utils.path_helpers import get_config_root
 
 log = get_logger(__name__)
+
+
+def upload_model_to_wandb(model_path, artifact_name, dataset_name, metadata=None):
+    log.info(f"Uploading model {model_path.name} to wandb.")
+
+    run = wandb.init(project=f"chm13-models-{dataset_name}", job_type="add-model")
+    hydra_cfg_dir = Path(HydraConfig().get().run.dir).absolute() / ".hydra"
+
+    artifact = wandb.Artifact(name=artifact_name, type="ml-model", incremental=True, metadata=metadata)
+    artifact.add_file(local_path=model_path)
+    artifact.add_dir(local_path=str(hydra_cfg_dir), name="metadata")
+    run.log_artifact(artifact)
+
+    log.info("Model uploaded to wandb.")
 
 
 def train(cfg: DictConfig) -> None:
@@ -47,6 +63,18 @@ def train(cfg: DictConfig) -> None:
             output_file_path = output_dir / "best_model.ckpt"
             log.info(f"Saving model {ckpt_path} to {output_file_path} ...")
             shutil.copy(ckpt_path, output_file_path)
+
+            metadata = {
+                "start": start,
+                "duration": datetime.now() - start,
+                "dataset": cfg.dataset_name,
+                "baseline": cfg.baseline,
+            }
+
+            if cfg.metadata is not None:
+                metadata.update(dict(cfg.metadata))
+
+            upload_model_to_wandb(output_file_path, cfg.baseline, cfg.dataset_name, metadata=metadata)
 
     if cfg.get("test", False):
         log.info("Start testing...")

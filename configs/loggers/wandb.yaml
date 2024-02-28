@@ -5,7 +5,7 @@ wandb:
   offline: True
   id: null # pass correct id to resume experiment! 12ctzfal.
   anonymous: null # enable anonymous logging
-  project: "dbg-edge-classification"
+  project: "dbg-ec"
   log_model: False # upload lightning ckpts
   prefix: "" # a string to put at the beginning of metric keys
   # entity: "" # set to name of your wandb team

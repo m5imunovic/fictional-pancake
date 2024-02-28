@@ -39,12 +39,10 @@ PROJECT_ROOT=./ python src/train.py experiment=exp_sign_digraph
 
 ## Transform data
 
-Usually, we want to transform data before the experiments. `species_name` option must match the name
+Usually, we want to transform data before the experiments. `dataset_name` option must match the name
 of the dataset directory with graph data for transformation. Then you can run the following command:
 
 ```bash
 # Transform multidigraph data using default transformations
-PROJECT_ROOT=./ python src/transform.py graph=multidigraph species_name=random_species_10_01
-# Transform digraph data using default transformations
-PROJECT_ROOT=./ python src/transform.py graph=digraph species_name=random_species_10_01
+PROJECT_ROOT=./ python src/transform.py graph=multidigraph dataset_name=random_species_10_01
 ```
