@@ -9,19 +9,27 @@ defaults:
   - _self_
 
 # custom configs
+trainer:
+  max_epochs: 1
+
 graph_type: ${graph.type}
-baseline: L${models.net.num_layers}_H${models.net.hidden_features}
+
+datamodules:
+  num_clusters: 4
+
+metadata:
+  graph: multidigraph
+
+baseline: E${trainer.max_epochs}_L${models.net.num_layers}_H${models.net.hidden_features}_C${datamodules.num_clusters}
 
 dataset_name: null
 
-trainer:
-  max_epochs: 5
 
 loggers:
   wandb:
-    name: E${trainer.max_epochs}_${baseline}_FLossM
+    name: E${trainer.max_epochs}_${baseline}
     group: train
-    tags: ["resgated_mdg"]
+    tags: ["resgated_mdg", "chm13N8_dataset_small", "in_out_degrees"]
     offline: True
     reinit: True
 
