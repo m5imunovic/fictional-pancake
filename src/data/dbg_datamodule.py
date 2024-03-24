@@ -30,7 +30,7 @@ class DBGDataModule(pl.LightningDataModule):
 
     @staticmethod
     def path_helper(path_specialized: Path, path_default: Path, path_descriptor: str) -> Path:
-        if path_specialized is None:
+        if not path_specialized:
             return Path(path_default) / path_descriptor
         return path_specialized
 

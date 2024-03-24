@@ -19,10 +19,11 @@ class DegreeFeatures(BaseTransform):
         self.name = "in_degree" if in_degree else "out_degree"
 
     def __call__(self, data: Data):
-        idx, x = data.edge_index[1 if self.in_degree else 0], data.x
+        idx = data.edge_index[1 if self.in_degree else 0]
         deg = degree(idx, data.num_nodes, dtype=torch.long).unsqueeze(-1)
 
-        if x is not None:
+        if "x" in data:
+            x = data.x
             x = x.view(-1, 1) if x.dim() == 1 else x
             data.x = torch.cat([x, deg.view(-1, 1)], dim=-1)
         else:
