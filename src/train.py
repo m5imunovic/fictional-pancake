@@ -55,9 +55,9 @@ def train(cfg: DictConfig) -> None:
         log.info("Start training...")
         trainer.fit(model=model, datamodule=datamodule, ckpt_path=cfg.get("ckpt_path"))
 
-    ckpt_path = trainer.checkpoint_callback.best_model_path
+    ckpt_path = trainer.checkpoint_callback.best_model_path or None
     if "model_output_path" in cfg:
-        if ckpt_path is not None:
+        if ckpt_path:
             output_dir = Path(cfg.model_output_path)
             output_dir.mkdir(exist_ok=True, parents=True)
             output_file_path = output_dir / "best_model.ckpt"
@@ -71,14 +71,14 @@ def train(cfg: DictConfig) -> None:
                 "baseline": cfg.baseline,
             }
 
-            if cfg.metadata is not None:
+            if cfg.metadata:
                 metadata.update(dict(cfg.metadata))
 
             upload_model_to_wandb(output_file_path, cfg.baseline, cfg.dataset_name, metadata=metadata)
 
     if cfg.get("test", False):
         log.info("Start testing...")
-        if ckpt_path is None:
+        if not ckpt_path:
             log.warning("Could not find best checkpoint path! Using current weights for testing...")
         trainer.test(model=model, datamodule=datamodule, ckpt_path=ckpt_path)
 
