@@ -15,7 +15,13 @@ logger = logging.getLogger(__name__)
 
 
 class ClusteredDBGDataset(Dataset):
-    def __init__(self, root: Path, transform: Callable | None = None, pre_transform: Callable | None = None, num_clusters: int = 0):
+    def __init__(
+        self,
+        root: Path,
+        transform: Callable | None = None,
+        pre_transform: Callable | None = None,
+        num_clusters: int = 0,
+    ):
         self.num_clusters = num_clusters
         super().__init__(str(root), transform, pre_transform)
 
@@ -24,13 +30,13 @@ class ClusteredDBGDataset(Dataset):
         if self.transformed_dir.exists():
             raw_entires = list(self.transformed_dir.glob("*.pt"))
         else:
-            raw_entries = list(Path(self.raw_dir).glob("*.pt"))
+            list(Path(self.raw_dir).glob("*.pt"))
         return raw_entires
 
     @property
     def transformed_dir(self) -> Path:
         return Path(self.root) / "transformed"
-    
+
     def process(self):
         if self.num_clusters > 0:
             logger.info(f"Partitioning dataset into {self.num_clusters} clusters")
@@ -43,7 +49,9 @@ class ClusteredDBGDataset(Dataset):
     def processed_file_names(self) -> list[Path]:
         if Path(self.processed_dir).exists():
             if self.num_clusters > 0:
-                processed_entires = list(Path(self.processed_dir).glob("*partition*.pt"))
+                processed_entires = list(
+                    Path(self.processed_dir).glob("*partition*.pt")
+                )
             else:
                 # TODO: better way to exclude pre and post filter pt
                 processed_entires = list(Path(self.processed_dir).glob("*[0-9].pt"))
@@ -58,7 +66,12 @@ class ClusteredDBGDataset(Dataset):
 
 
 class DBGDataset(Dataset):
-    def __init__(self, root: Path, transform: Callable | None = None, pre_transform: Callable | None = None):
+    def __init__(
+        self,
+        root: Path,
+        transform: Callable | None = None,
+        pre_transform: Callable | None = None,
+    ):
         super().__init__(str(root), transform, pre_transform)
 
     @cached_property
@@ -93,7 +106,6 @@ class DBGDataset(Dataset):
 
 
 def partition_dataset2(root: Path, num_parts: int, recursive: bool = False):
-
     dataset = DBGDataset(root)
     to_undirected = T.ToUndirected()
     clusters_dir = Path(dataset.processed_dir)
@@ -104,10 +116,10 @@ def partition_dataset2(root: Path, num_parts: int, recursive: bool = False):
         graph = dataset[idx]
         graph.node_ids = torch.arange(graph.num_nodes)
         cluster_dataset = ClusterData(
-            data = to_undirected(graph.clone()),
+            data=to_undirected(graph.clone()),
             num_parts=num_parts,
             recursive=recursive,
-            log=True
+            log=True,
         )
         for part, data in enumerate(cluster_dataset):
             d = graph.subgraph(data.node_ids)
@@ -115,7 +127,6 @@ def partition_dataset2(root: Path, num_parts: int, recursive: bool = False):
 
 
 def partition_dataset(root: Path, num_parts: int, recursive: bool = False) -> Path:
-
     dataset = ClusteredDBGDataset(root)
     to_undirected = T.ToUndirected()
 
@@ -127,10 +138,10 @@ def partition_dataset(root: Path, num_parts: int, recursive: bool = False) -> Pa
         graph = dataset[idx]
         graph.node_ids = torch.arange(graph.num_nodes)
         cluster_dataset = ClusterData(
-            data = to_undirected(graph.clone()),
+            data=to_undirected(graph.clone()),
             num_parts=num_parts,
             recursive=recursive,
-            log=True
+            log=True,
         )
         for part, data in enumerate(cluster_dataset):
             d = graph.subgraph(data.node_ids)

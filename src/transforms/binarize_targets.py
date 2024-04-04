@@ -1,4 +1,3 @@
-from typing import List
 
 from torch_geometric.data import Data
 from torch_geometric.transforms import BaseTransform
@@ -11,7 +10,7 @@ class BinarizeTargets(BaseTransform):
         attrs (List[str]): The names of attributes to normalize.
     """
 
-    def __init__(self, attrs: List[str] = ["y"]):
+    def __init__(self, attrs: list[str] = ["y"]):
         self.attrs = attrs
 
     def __call__(

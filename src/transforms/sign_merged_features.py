@@ -19,7 +19,6 @@ class SIGNMergedFeatures(BaseTransform):
         self,
         data: Data,
     ) -> Data:
-
         data = SIGN(self.K)(data)
         x_features = []
         for attr in self.attrs:

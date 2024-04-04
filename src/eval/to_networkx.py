@@ -1,7 +1,9 @@
-"""This is based on implementation from pytorch_geometric 2.5.1. I just threw out the 
-parts that I don't need to make it a bit more readable. Have some issues installing
-newer pytorch_geometric versions but once that is solved this should be deleted.
+"""This is based on implementation from pytorch_geometric 2.5.1.
+
+I just threw out the parts that I don't need to make it a bit more readable. Have some issues installing newer
+pytorch_geometric versions but once that is solved this should be deleted.
 """
+
 from typing import Any, Iterable
 
 import networkx as nx
@@ -44,7 +46,9 @@ def to_networkx(
     G.add_nodes_from(range(data.num_nodes))
 
     if edge_attrs_dst:
-        assert len(edge_attrs_dst) == len(edge_attrs_src), "Mapping length does not match"
+        assert len(edge_attrs_dst) == len(
+            edge_attrs_src
+        ), "Mapping length does not match"
 
     for edge_store in data.edge_stores:
         for i, (v, w) in enumerate(edge_store.edge_index.t().tolist()):

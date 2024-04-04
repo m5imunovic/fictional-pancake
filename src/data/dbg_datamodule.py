@@ -29,14 +29,22 @@ class DBGDataModule(pl.LightningDataModule):
         self.test_ds: Optional[DBGDataset] = None
 
     @staticmethod
-    def path_helper(path_specialized: Path, path_default: Path, path_descriptor: str) -> Path:
+    def path_helper(
+        path_specialized: Path, path_default: Path, path_descriptor: str
+    ) -> Path:
         if not path_specialized:
             return Path(path_default) / path_descriptor
         return path_specialized
 
     def train_dataloader(self) -> DataLoader:
-        path = self.path_helper(self.hparams.train_path, self.hparams.dataset_path, "train")
-        self.train_ds = ClusteredDBGDataset(root=path, transform=self.hparams.transform, num_clusters=self.hparams.num_clusters)
+        path = self.path_helper(
+            self.hparams.train_path, self.hparams.dataset_path, "train"
+        )
+        self.train_ds = ClusteredDBGDataset(
+            root=path,
+            transform=self.hparams.transform,
+            num_clusters=self.hparams.num_clusters,
+        )
         return DataLoader(
             self.train_ds,
             batch_size=self.hparams.batch_size,
@@ -46,7 +54,11 @@ class DBGDataModule(pl.LightningDataModule):
 
     def val_dataloader(self) -> DataLoader:
         path = self.path_helper(self.hparams.val_path, self.hparams.dataset_path, "val")
-        self.val_ds = ClusteredDBGDataset(root=path, transform=self.hparams.transform, num_clusters=self.hparams.num_clusters)
+        self.val_ds = ClusteredDBGDataset(
+            root=path,
+            transform=self.hparams.transform,
+            num_clusters=self.hparams.num_clusters,
+        )
         return DataLoader(
             self.val_ds,
             batch_size=self.hparams.batch_size,
@@ -54,7 +66,9 @@ class DBGDataModule(pl.LightningDataModule):
         )
 
     def test_dataloader(self) -> DataLoader:
-        path = self.path_helper(self.hparams.test_path, self.hparams.dataset_path, "test")
+        path = self.path_helper(
+            self.hparams.test_path, self.hparams.dataset_path, "test"
+        )
         self.test_ds = DBGDataset(root=path, transform=self.hparams.transform)
         return DataLoader(
             self.test_ds,
@@ -64,7 +78,9 @@ class DBGDataModule(pl.LightningDataModule):
 
     def predict_dataloader(self) -> DataLoader:
         # TODO: implement predict dataloader for data without labels, for now use test data
-        path = self.path_helper(self.hparams.test_path, self.hparams.dataset_path, "test")
+        path = self.path_helper(
+            self.hparams.test_path, self.hparams.dataset_path, "test"
+        )
         self.test_ds = DBGDataset(root=path, transform=self.hparams.transform)
         return DataLoader(
             self.test_ds,

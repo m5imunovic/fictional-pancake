@@ -7,7 +7,7 @@ root_dir: ${oc.env:PROJECT_ROOT}
 # path to data directory
 data_dir: null
 # path for project outputs (models, logs, wandb)
-storage_dir: ${paths.data_dir}
+storage_dir: ${paths.data_dir}/storage
 
 # path to datasets
 dataset_dir: ${paths.data_dir}/datasets

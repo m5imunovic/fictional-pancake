@@ -2,7 +2,6 @@ from transforms.sign_merged_features import SIGNMergedFeatures
 
 
 def test_sign_merged_features(tg_simple_data):
-
     K = 5
     num_nodes = tg_simple_data.num_nodes
     num_node_features = tg_simple_data.num_node_features

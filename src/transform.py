@@ -27,7 +27,11 @@ def transform(cfg: DictConfig) -> None:
     return None
 
 
-@hydra.main(version_base=None, config_path=str(get_config_root()), config_name="transform_cfg.yaml")
+@hydra.main(
+    version_base=None,
+    config_path=str(get_config_root()),
+    config_name="transform_cfg.yaml",
+)
 def main(cfg: DictConfig) -> Optional[float]:
     """Transformation script entry point.
 

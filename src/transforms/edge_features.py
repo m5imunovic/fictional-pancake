@@ -1,4 +1,3 @@
-from typing import List
 
 from torch_geometric.data import Data
 from torch_geometric.transforms import BaseTransform
@@ -12,7 +11,7 @@ class NormalizeEdgeFeatures(BaseTransform):
             If set to True, will compute the in-degree of nodes instead of the out-degree.
     """
 
-    def __init__(self, attrs: List[str] = ["edge_attr"]):
+    def __init__(self, attrs: list[str] = ["edge_attr"]):
         self.attrs = attrs
 
     def __call__(self, data: Data):

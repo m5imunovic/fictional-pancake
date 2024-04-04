@@ -1,4 +1,3 @@
-from typing import List
 
 from torch.nn.functional import normalize
 from torch_geometric.data import Data
@@ -12,7 +11,7 @@ class ColNormalizeFeatures(BaseTransform):
         attrs (List[str]): The names of attributes to normalize.
     """
 
-    def __init__(self, attrs: List[str] = ["x"]):
+    def __init__(self, attrs: list[str] = ["x"]):
         self.attrs = attrs
 
     def __call__(
