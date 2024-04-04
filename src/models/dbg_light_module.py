@@ -76,12 +76,25 @@ class DBGLightningModule(pl.LightningModule):
         self.train_acc(torch.sigmoid(scores), expected_scores.int())
 
         self.log(
-            "train/loss", loss, on_step=True, on_epoch=True, prog_bar=True, logger=True, batch_size=self.batch_size
+            "train/loss",
+            loss,
+            on_step=True,
+            on_epoch=True,
+            prog_bar=True,
+            logger=True,
+            batch_size=self.batch_size,
         )
         return loss
 
     def on_train_epoch_end(self) -> None:
-        self.log("train/acc", self.train_acc, on_epoch=True, prog_bar=True, logger=True, batch_size=self.batch_size)
+        self.log(
+            "train/acc",
+            self.train_acc,
+            on_epoch=True,
+            prog_bar=True,
+            logger=True,
+            batch_size=self.batch_size,
+        )
 
     def validation_step(self, batch, batch_idx, dataloader_idx=0):
         scores, expected_scores = self.common_step(batch, batch_idx, dataloader_idx)

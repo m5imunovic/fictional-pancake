@@ -22,5 +22,4 @@ job_logging:
   root:
     level: INFO
     handlers: [console, file]
-
 # https://github.com/facebookresearch/hydra/blob/main/hydra/conf/hydra/job_logging/default.yaml

@@ -5,7 +5,6 @@ from utils.path_helpers import get_config_root
 
 
 def test_init_sign_digraph(tg_simple_data, sign_transform):
-
     num_nodes = tg_simple_data.num_nodes
     num_node_features = tg_simple_data.num_node_features
     K = sign_transform.transforms[1].K

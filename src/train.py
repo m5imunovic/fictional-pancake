@@ -22,7 +22,9 @@ def upload_model_to_wandb(model_path, artifact_name, dataset_name, metadata=None
     run = wandb.init(project=f"chm13-models-{dataset_name}", job_type="add-model")
     hydra_cfg_dir = Path(HydraConfig().get().run.dir).absolute() / ".hydra"
 
-    artifact = wandb.Artifact(name=artifact_name, type="ml-model", incremental=True, metadata=metadata)
+    artifact = wandb.Artifact(
+        name=artifact_name, type="ml-model", incremental=True, metadata=metadata
+    )
     artifact.add_file(local_path=model_path)
     artifact.add_dir(local_path=str(hydra_cfg_dir), name="metadata")
     run.log_artifact(artifact)
@@ -47,7 +49,9 @@ def train(cfg: DictConfig) -> None:
     loggers = instantiate_component_list(cfg.loggers)
 
     log.info("Init trainer...")
-    trainer: pl.Trainer = hydra.utils.instantiate(cfg.trainer, logger=loggers, callbacks=callbacks)
+    trainer: pl.Trainer = hydra.utils.instantiate(
+        cfg.trainer, logger=loggers, callbacks=callbacks
+    )
 
     log.info("Save experiment hyperparameters...")
 
@@ -74,12 +78,16 @@ def train(cfg: DictConfig) -> None:
             if cfg.metadata:
                 metadata.update(dict(cfg.metadata))
 
-            upload_model_to_wandb(output_file_path, cfg.baseline, cfg.dataset_name, metadata=metadata)
+            upload_model_to_wandb(
+                output_file_path, cfg.baseline, cfg.dataset_name, metadata=metadata
+            )
 
     if cfg.get("test", False):
         log.info("Start testing...")
         if not ckpt_path:
-            log.warning("Could not find best checkpoint path! Using current weights for testing...")
+            log.warning(
+                "Could not find best checkpoint path! Using current weights for testing..."
+            )
         trainer.test(model=model, datamodule=datamodule, ckpt_path=ckpt_path)
 
     duration = datetime.now() - start
@@ -87,7 +95,9 @@ def train(cfg: DictConfig) -> None:
     return None
 
 
-@hydra.main(version_base=None, config_path=str(get_config_root()), config_name="train_cfg.yaml")
+@hydra.main(
+    version_base=None, config_path=str(get_config_root()), config_name="train_cfg.yaml"
+)
 def main(cfg: DictConfig) -> Optional[float]:
     """Training script entry point.
 

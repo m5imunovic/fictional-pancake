@@ -7,7 +7,12 @@ from torch_geometric.nn.conv import MessagePassing
 
 class ResGatedMultiDiGraphNet(nn.Module):
     def __init__(
-        self, num_layers: int, node_features: int, edge_features: int, hidden_features: int, batch_norm: bool = False
+        self,
+        num_layers: int,
+        node_features: int,
+        edge_features: int,
+        hidden_features: int,
+        batch_norm: bool = False,
     ):
         super().__init__()
 
@@ -16,7 +21,9 @@ class ResGatedMultiDiGraphNet(nn.Module):
         self.W21 = nn.Linear(edge_features, hidden_features, bias=True)
         self.W22 = nn.Linear(hidden_features, hidden_features, bias=True)
 
-        self.gate = LayeredGatedGCN(num_layers=num_layers, hidden_features=hidden_features)
+        self.gate = LayeredGatedGCN(
+            num_layers=num_layers, hidden_features=hidden_features
+        )
         self.ln1 = nn.LayerNorm(hidden_features)
         self.ln2 = nn.LayerNorm(hidden_features)
 
@@ -41,7 +48,9 @@ class ResGatedMultiDiGraphNet(nn.Module):
 class LayeredGatedGCN(nn.Module):
     def __init__(self, num_layers: int, hidden_features: int):
         super().__init__()
-        self.gnn = nn.ModuleList([GatedGCN(hidden_features=hidden_features) for _ in range(num_layers)])
+        self.gnn = nn.ModuleList(
+            [GatedGCN(hidden_features=hidden_features) for _ in range(num_layers)]
+        )
 
     def forward(self, h, edge_attr, edge_index):
         for gnn_layer in self.gnn:

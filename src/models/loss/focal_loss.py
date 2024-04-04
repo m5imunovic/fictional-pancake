@@ -11,4 +11,6 @@ class FocalLoss(nn.Module):
         self.reduction = reduction
 
     def forward(self, input: Tensor, target: Tensor) -> Tensor:
-        return sigmoid_focal_loss(input, target, alpha=self.alpha, gamma=self.gamma, reduction=self.reduction)
+        return sigmoid_focal_loss(
+            input, target, alpha=self.alpha, gamma=self.gamma, reduction=self.reduction
+        )

@@ -5,15 +5,15 @@ default_language_version:
 
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.3.0
+    rev: v4.5.0
     hooks:
       - id: check-added-large-files
-        args: [--maxkb=8000]
+        args: [--maxkb=16000]
       - id: check-builtin-literals
       - id: check-byte-order-marker
       - id: check-case-conflict
       - id: check-docstring-first
-      # - id: check-executables-have-shebangs
+      - id: check-executables-have-shebangs
       - id: check-vcs-permalinks
       - id: check-yaml
       - id: debug-statements
@@ -26,25 +26,22 @@ repos:
       - id: trailing-whitespace
 
   # python code formatting
-  - repo: https://github.com/psf/black
-    rev: 22.6.0
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    # Ruff version.
+    rev: v0.3.5
     hooks:
-      - id: black
-        args: [--line-length, "119"]
-
-  # python import sorting
-  - repo: https://github.com/PyCQA/isort
-    rev: 5.13.0
-    hooks:
-      - id: isort
-        args: ["--profile", "black", "--filter-files"]
+      # Run the linter.
+      - id: ruff
+        args: [--fix]
+      # Run the formatter.
+      - id: ruff-format
 
   # python upgrading syntax to newer version
   - repo: https://github.com/asottile/pyupgrade
     rev: v2.32.1
     hooks:
       - id: pyupgrade
-        args: [--py38-plus]
+        args: [--py39-plus]
 
   # python docstring formatting
   - repo: https://github.com/myint/docformatter
@@ -94,7 +91,7 @@ repos:
 
   # shell scripts linter
   - repo: https://github.com/shellcheck-py/shellcheck-py
-    rev: v0.8.0.4
+    rev: v0.10.0.1
     hooks:
       - id: shellcheck
 

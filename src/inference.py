@@ -1,5 +1,5 @@
 import json
-from typing import Dict, List, Optional
+from typing import Optional
 
 import hydra
 import pytorch_lightning as pl
@@ -13,7 +13,7 @@ from utils.path_helpers import get_config_root
 log = get_logger(__name__)
 
 
-def partition_results(results: List[torch.Tensor], dataset_info_path) -> List[Dict]:
+def partition_results(results: list[torch.Tensor], dataset_info_path) -> list[dict]:
     """Partition results from trainer.predict() into separate lists.
 
     Args:
@@ -30,7 +30,9 @@ def partition_results(results: List[torch.Tensor], dataset_info_path) -> List[Di
         id_map_path = dataset_info_path / f"{idx}.idmap"
         with open(id_map_path) as handle:
             id_map = json.load(handle)
-        assert len(result) == len(id_map), "Inference result and corresponding id map do not match."
+        assert len(result) == len(
+            id_map
+        ), "Inference result and corresponding id map do not match."
         for i, val in enumerate(result.int()):
             hash_id = id_map[str(i)]
             key = mapper[val.item()]
@@ -72,7 +74,11 @@ def infere(cfg: DictConfig) -> None:
     return None
 
 
-@hydra.main(version_base=None, config_path=str(get_config_root()), config_name="inference_cfg.yaml")
+@hydra.main(
+    version_base=None,
+    config_path=str(get_config_root()),
+    config_name="inference_cfg.yaml",
+)
 def main(cfg: DictConfig) -> Optional[float]:
     """Training script entry point.
 

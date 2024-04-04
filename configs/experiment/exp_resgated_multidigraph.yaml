@@ -24,7 +24,6 @@ baseline: E${trainer.max_epochs}_L${models.net.num_layers}_H${models.net.hidden_
 
 dataset_name: null
 
-
 loggers:
   wandb:
     name: E${trainer.max_epochs}_${baseline}

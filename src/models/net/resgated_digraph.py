@@ -4,17 +4,27 @@ from torch_geometric.nn.conv import ResGatedGraphConv
 
 
 class ResGatedDiGraphNet(nn.Module):
-    def __init__(self, num_layers: int, node_features: int, hidden_features: int, batch_norm: bool = False):
+    def __init__(
+        self,
+        num_layers: int,
+        node_features: int,
+        hidden_features: int,
+        batch_norm: bool = False,
+    ):
         super().__init__()
 
         self.W1 = nn.Linear(node_features, hidden_features, bias=True)
         self.W2 = nn.Linear(hidden_features, hidden_features, bias=True)
 
         self.gate_fw = LayeredResGatedGraphConv(
-            num_layers=num_layers, hidden_features=hidden_features, flow="source_to_target"
+            num_layers=num_layers,
+            hidden_features=hidden_features,
+            flow="source_to_target",
         )
         self.gate_bw = LayeredResGatedGraphConv(
-            num_layers=num_layers, hidden_features=hidden_features, flow="target_to_source"
+            num_layers=num_layers,
+            hidden_features=hidden_features,
+            flow="target_to_source",
         )
 
         self.scorer = nn.Linear(2 * hidden_features, out_features=1, bias=True)
@@ -35,7 +45,9 @@ class LayeredResGatedGraphConv(nn.Module):
         super().__init__()
         self.gnn = nn.ModuleList(
             [
-                ResGatedGraphConv(in_channels=hidden_features, out_channels=hidden_features, flow=flow)
+                ResGatedGraphConv(
+                    in_channels=hidden_features, out_channels=hidden_features, flow=flow
+                )
                 for _ in range(num_layers)
             ]
         )

@@ -1,7 +1,7 @@
 import enum
 
 import matplotlib as mpl
-from matplotlib.colors import LinearSegmentedColormap, Normalize
+from matplotlib.colors import LinearSegmentedColormap
 
 
 class ColorMap(enum.Enum):
@@ -26,12 +26,11 @@ def custom_red_green_cm():
         Custom colormap, Green and Red only
     """
     # Define color points for red and green
-    colors = {"red":   [(0.0, 1.0, 1.0),
-                        (1.0, 0.0, 0.0)],
-              "green": [(0.0, 0.0, 0.0),
-                        (1.0, 1.0, 1.0)],
-              "blue":  [(0.0, 0.0, 0.0),
-                        (1.0, 0.0, 0.0)]}
+    colors = {
+        "red": [(0.0, 1.0, 1.0), (1.0, 0.0, 0.0)],
+        "green": [(0.0, 0.0, 0.0), (1.0, 1.0, 1.0)],
+        "blue": [(0.0, 0.0, 0.0), (1.0, 0.0, 0.0)],
+    }
     # Create colormap
     return LinearSegmentedColormap("custom_rg", colors)
 
@@ -47,6 +46,8 @@ class ColorMapGen:
             raise ValueError(f"Unsupported colormap name: {name}!")
 
     def generate_color(self, probability: float):
-        assert 0. <= probability <= 1.0, f"Probability value must be in range [0., 1.], got {probability=}"
+        assert (
+            0.0 <= probability <= 1.0
+        ), f"Probability value must be in range [0., 1.], got {probability=}"
         color = self.cmap(self.norm(probability))
         return mpl.colors.to_hex(color)

@@ -1,4 +1,3 @@
-from typing import List
 
 from torch_geometric.data import Data
 from torch_geometric.transforms import BaseTransform
@@ -11,7 +10,7 @@ class ColZscoreFeatures(BaseTransform):
         attrs (List[str]): The names of attributes to normalize.
     """
 
-    def __init__(self, attrs: List[str] = ["x"]):
+    def __init__(self, attrs: list[str] = ["x"]):
         self.attrs = attrs
 
     def __call__(

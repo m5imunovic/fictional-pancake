@@ -1,10 +1,13 @@
 """Classical multilayer perceptron (MLP) model."""
+
 import torch
 import torch.nn.functional as F
 
 
 class MLP(torch.nn.Module):
-    def __init__(self, node_features, hidden_features, out_features, num_layers, dropout):
+    def __init__(
+        self, node_features, hidden_features, out_features, num_layers, dropout
+    ):
         super().__init__()
 
         self.lins = torch.nn.ModuleList()

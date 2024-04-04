@@ -12,5 +12,7 @@ def test_normalize_scale():
     data = Data(x=x)
     data = ColNormalizeFeatures()(data)
     assert len(data) == 1
-    expected_data = torch.tensor([[0.25, 0, 0.3333, 0], [0.5, 1, 0.6667, 0], [0.25, 0, 0, 0]], dtype=torch.float)
+    expected_data = torch.tensor(
+        [[0.25, 0, 0.3333, 0], [0.5, 1, 0.6667, 0], [0.25, 0, 0, 0]], dtype=torch.float
+    )
     assert torch.allclose(data.x, expected_data, atol=1e-4)
