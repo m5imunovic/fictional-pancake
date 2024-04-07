@@ -1,0 +1,5 @@
+Subset,Id,Species,Chromosomes,Seed,Probability,ProfileId,RunId,Version
+val,0,test_species.yaml,['chr1'],20001,0.930,,240407_2048,0.0.1
+val,1,test_species.yaml,['chr1'],20002,0.930,,240407_2048,0.0.1
+val,2,test_species.yaml,['chr1'],20001,0.980,,240407_2048,0.0.1
+val,3,test_species.yaml,['chr1'],20002,0.980,,240407_2048,0.0.1
