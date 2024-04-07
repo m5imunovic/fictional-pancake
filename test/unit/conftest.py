@@ -31,8 +31,8 @@ def rs_20000_data_path(test_data_path) -> Path:
 
 
 @pytest.fixture
-def rs_full_30000_data_path(test_data_path) -> Path:
-    return test_data_path / "rs_full_30000"
+def unittest_ds_path(test_data_path) -> Path:
+    return test_data_path / "unittest_dataset"
 
 
 @pytest.fixture
