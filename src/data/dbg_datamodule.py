@@ -17,9 +17,10 @@ class DBGDataModule(pl.LightningDataModule):
         test_path: Optional[Path] = None,
         dataset_path: Optional[Path] = None,
         transform: T.Compose = None,
+        shuffle: bool = True,
         batch_size: int = 1,
         num_workers: int = 0,
-        num_clusters: int = 0,
+        num_clusters: int = 2,
     ):
         super().__init__()
 
@@ -46,7 +47,7 @@ class DBGDataModule(pl.LightningDataModule):
             self.train_ds,
             batch_size=self.hparams.batch_size,
             num_workers=self.hparams.num_workers,
-            shuffle=False,
+            shuffle=self.hparams.shuffle,
         )
 
     def val_dataloader(self) -> DataLoader:
@@ -60,6 +61,7 @@ class DBGDataModule(pl.LightningDataModule):
             self.val_ds,
             batch_size=self.hparams.batch_size,
             num_workers=self.hparams.num_workers,
+            shuffle=self.hparams.shuffle,
         )
 
     def test_dataloader(self) -> DataLoader:
