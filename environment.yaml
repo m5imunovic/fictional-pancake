@@ -1,44 +1,29 @@
-name: menv
+name: fenv
 
 channels:
   - pyg
   - pytorch
   - nvidia
-  - anaconda
-  - conda-forge
-  - defaults
 
 dependencies:
-  - python=3.10.4
-  - pip=22.2.2
-
-  # Math and numerics
-  #- numba=0.56.4
-  #- numpy=1.23.3
-  - scikit-learn
-  - scipy
+  - python=3.11
+  - pip
 
   # ML
+  - pytorch::pytorch-cuda
+  - pytorch::torchvision
+  - pytorch::torchaudio
   - pyg::pyg
   - pyg::pytorch-sparse
   - pyg::pytorch-cluster
-  - pytorch-cuda=11.8
   - conda-forge::lightning
-  - pytorch::torchaudio
-  - pytorch::torchvision
-  - ogb
   - conda-forge::torchmetrics
+  - nvidia::cudatoolkit
   - wandb
 
   # Math
   - numpy
   - scipy
-
-  # Bio
-  - biopython
-
-  # Graph
-  - networkx
 
   # Config
   - colorlog
@@ -46,17 +31,13 @@ dependencies:
   - pyyaml
 
   # Testing
-  - icontract
   - pre-commit
   - pytest
+  - pytest-xdist
   - typeguard
 
   # Other
-  - filelock
-  - protobuf
   - tqdm
 
   - pip:
       - hydra-colorlog
-      - distinctipy
-      - jupyterlab
