@@ -1,4 +1,6 @@
 import os
+import shutil
+import zipfile
 from pathlib import Path
 
 import hydra
@@ -31,8 +33,18 @@ def rs_20000_data_path(test_data_path) -> Path:
 
 
 @pytest.fixture
-def unittest_ds_path(test_data_path) -> Path:
-    return test_data_path / "unittest_dataset"
+def unittest_ds_zip(test_data_path) -> Path:
+    return test_data_path / "unittest_dataset.zip"
+
+
+@pytest.fixture(scope="function")
+def unittest_ds_path(unittest_ds_zip, tmp_path) -> Path:
+    with zipfile.ZipFile(unittest_ds_zip, "r") as zip_file:
+        zip_file.extractall(tmp_path)
+
+    yield tmp_path / "unittest_dataset"
+
+    shutil.rmtree(tmp_path)
 
 
 @pytest.fixture
