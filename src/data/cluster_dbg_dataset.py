@@ -6,7 +6,7 @@ from typing import Callable
 import torch
 from torch_geometric.data import Data, Dataset
 
-from data.partition_dataset import partition_dataset
+from transforms.partition_data import PartitionData
 
 logger = logging.getLogger(__name__)
 
@@ -19,40 +19,41 @@ class ClusteredDBGDataset(Dataset):
         pre_transform: Callable | None = None,
         num_clusters: int = 2,
     ):
-        assert num_clusters >= 2, "Clustered dataset should have at least two clusters"
-        self.num_clusters = num_clusters
-        super().__init__(str(root), transform, pre_transform)
+        assert num_clusters >= 2, "Clustered dataset should have at least two partitions per sample"
+        self.num_parts = num_clusters
+        pre_transform = pre_transform or PartitionData(num_parts=self.num_parts)
+        super().__init__(str(root), transform=transform, pre_transform=pre_transform)
 
     @property
     def raw_file_names(self) -> list[Path]:
-        if self.transformed_dir.exists():
-            raw_entires = list(self.transformed_dir.glob("*.pt"))
-        else:
-            list(Path(self.raw_dir).glob("*.pt"))
-        return raw_entires
-
-    @property
-    def transformed_dir(self) -> Path:
-        return Path(self.root) / "transformed"
+        return list(Path(self.raw_dir).glob("*.pt"))
 
     def process(self):
-        if self.num_clusters > 0:
-            logger.info(f"Partitioning dataset into {self.num_clusters} clusters")
-            start = datetime.now()
-            partition_dataset(Path(self.root), self.num_clusters)
-            duration = datetime.now() - start
-            logger.info(f"Partitioning finished after {duration}")
+        processed_dir = Path(self.processed_dir)
+        clustered_dir = processed_dir / str(self.num_parts)
+        if clustered_dir.exists():
+            return
+        clustered_dir.mkdir(parents=True)
+
+        logger.info(f"Partitioning dataset into {self.num_parts} partitions")
+        start = datetime.now()
+        for raw_file in self.raw_file_names:
+            data = torch.load(raw_file)
+            parts = self.pre_transform(data)
+            for part_idx, part in enumerate(parts):
+                save_path = clustered_dir / f"{raw_file.stem}_part_{part_idx}.pt"
+                torch.save(part, save_path)
+
+        logger.info(f"Partitioning finished after {datetime.now() - start}")
 
     @property
     def processed_file_names(self) -> list[Path]:
-        if Path(self.processed_dir).exists():
-            if self.num_clusters > 0:
-                processed_entires = list(Path(self.processed_dir).glob("*partition*.pt"))
-            else:
-                # TODO: better way to exclude pre and post filter pt
-                processed_entires = list(Path(self.processed_dir).glob("*[0-9].pt"))
-            return processed_entires
-        return []
+        processed_dir = Path(self.processed_dir)
+        clustered_dir = processed_dir / str(self.num_parts)
+        if not clustered_dir.exists():
+            return []
+        processed_entires = list(Path(clustered_dir).glob("*part*.pt"))
+        return processed_entires
 
     def len(self) -> int:
         return len(self.processed_file_names)
