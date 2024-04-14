@@ -31,7 +31,7 @@ class DBGDataModule(pl.LightningDataModule):
         self.test_ds: Optional[DBGDataset] = None
 
     @staticmethod
-    def path_helper(path_specialized: Path, path_default: Path, path_descriptor: str) -> Path:
+    def path_helper(path_specialized: Path | None, path_default: Path, path_descriptor: str) -> Path:
         if not path_specialized:
             return Path(path_default) / path_descriptor
         return path_specialized

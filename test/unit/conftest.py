@@ -2,6 +2,7 @@ import os
 import shutil
 import zipfile
 from pathlib import Path
+from typing import Generator
 
 import hydra
 import pytest
@@ -38,7 +39,7 @@ def unittest_ds_zip(test_data_path) -> Path:
 
 
 @pytest.fixture(scope="function")
-def unittest_ds_path(unittest_ds_zip, tmp_path) -> Path:
+def unittest_ds_path(unittest_ds_zip, tmp_path) -> Generator:
     with zipfile.ZipFile(unittest_ds_zip, "r") as zip_file:
         zip_file.extractall(tmp_path)
 
