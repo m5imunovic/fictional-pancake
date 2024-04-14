@@ -1,0 +1,19 @@
+# path to root directory
+# PROJECT_ROOT environment variable is defined in .env file in root of the project
+# VS Code will pick this up automatically otherwise it needs to be defined before
+# running the script, e.g. PROJECT_ROOT="$HOME/ws/project" python src/train.py
+root_dir: ${oc.env:PROJECT_ROOT}
+
+# path to data directory
+data_dir: null
+# path for project outputs (models, logs, wandb)
+storage_dir: ${paths.data_dir}/storage
+
+# path to datasets
+dataset_dir: ${paths.data_dir}/datasets
+# path to saved models (e.g. for inference)
+model_dir: ${paths.storage_dir}/models
+# see hydra config for the exact format used
+output_dir: ${hydra.runtime.output_dir}
+# path to logging directory
+log_dir: ${paths.storage_dir}/logs

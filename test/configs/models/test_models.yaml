@@ -1,0 +1,25 @@
+defaults:
+  - net: test_resgated_multidigraph
+  - _self_
+
+_target_: models.dbg_light_module.DBGLightningModule
+
+optimizer:
+  _target_: torch.optim.Adam
+  _partial_: true
+  lr: 0.001
+  weight_decay: 0.0
+
+scheduler:
+  _target_: torch.optim.lr_scheduler.ReduceLROnPlateau
+  _partial_: true
+  mode: min
+  factor: 0.95
+  patience: 2
+  min_lr: 1.e-6
+
+criterion:
+  _target_: models.loss.focal_loss.FocalLoss
+  alpha: 0.25
+  gamma: 2
+  reduction: mean

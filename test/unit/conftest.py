@@ -1,4 +1,3 @@
-import os
 import shutil
 import zipfile
 from pathlib import Path
@@ -8,49 +7,44 @@ import hydra
 import pytest
 import torch
 import torch_geometric as tg
-from hydra import compose, initialize, initialize_config_dir
+from hydra import compose, initialize_config_dir
 from omegaconf import DictConfig
 
 from utils.path_helpers import get_config_root, get_test_root
 
 
-@pytest.fixture
-def cfg_project_train() -> DictConfig:
-    file_parent_path = Path(__file__).parent
-    relative_config_path = os.path.relpath(get_config_root(), file_parent_path)
-    with initialize(version_base="1.2", config_path=relative_config_path):
-        cfg = compose(config_name="train_cfg.yaml", return_hydra_config=True)
-        return cfg
-
-
-@pytest.fixture
+@pytest.fixture(scope="session")
 def test_data_path() -> Path:
     return get_test_root() / "data"
 
 
-@pytest.fixture
-def rs_20000_data_path(test_data_path) -> Path:
-    return test_data_path / "cluster/rs_20000"
+@pytest.fixture(scope="session")
+def test_cfg_root(test_data_path) -> Path:
+    return get_test_root() / "configs"
 
 
-@pytest.fixture
+@pytest.fixture(scope="session")
 def unittest_ds_zip(test_data_path) -> Path:
     return test_data_path / "unittest_dataset.zip"
 
 
 @pytest.fixture(scope="function")
 def unittest_ds_path(unittest_ds_zip, tmp_path) -> Generator:
+    datasets_path = tmp_path / "datasets"
     with zipfile.ZipFile(unittest_ds_zip, "r") as zip_file:
-        zip_file.extractall(tmp_path)
+        zip_file.extractall(datasets_path)
 
-    yield tmp_path / "unittest_dataset"
-
+    yield datasets_path / "unittest_dataset"
     shutil.rmtree(tmp_path)
 
 
-@pytest.fixture
-def rs_20000_path(test_data_path) -> Path:
-    return test_data_path / "random_species_20000_12_15"
+@pytest.fixture(scope="function")
+def test_train_cfg(test_cfg_root, unittest_ds_path) -> DictConfig:
+    data_dir = unittest_ds_path.parent.parent
+    overrides = [f"paths.data_dir={data_dir}"]
+    with initialize_config_dir(version_base=None, config_dir=str(test_cfg_root)):
+        cfg = compose(config_name="test_train_config.yaml", overrides=overrides, return_hydra_config=True)
+        return cfg
 
 
 @pytest.fixture
