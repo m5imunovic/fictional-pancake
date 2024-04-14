@@ -11,7 +11,7 @@ def test_dbg_dataset(unittest_ds_path):
         assert raw_name.name in expected_names, f"Name {raw_name.name} not expected in dataset"
 
     assert ds_train.processed_file_names == []
-    assert ds_train.transformed_dir == unittest_ds_path / "train" / "transformed"
+    assert ds_train.transformed_dir == unittest_ds_path / "train" / "processed"
 
     transform = Compose([Constant(value=0.5)])
     ds_val = DBGDataset(unittest_ds_path / "val", transform=transform)

@@ -3,7 +3,9 @@ from pathlib import Path
 from typing import Callable
 
 import torch
-from torch_geometric.data import Data, Dataset
+from torch_geometric.data import Dataset
+
+from data.dbg_dataset_entry import DataSample
 
 
 class DBGDataset(Dataset):
@@ -22,7 +24,7 @@ class DBGDataset(Dataset):
 
     @property
     def transformed_dir(self) -> Path:
-        return Path(self.root) / "transformed"
+        return Path(self.processed_dir)
 
     @cached_property
     def _processed_file_names(self) -> list[str]:
@@ -37,10 +39,12 @@ class DBGDataset(Dataset):
             return len(self.processed_file_names)
         return len(self.raw_file_names)
 
-    def get(self, idx) -> Data:
+    def get(self, idx) -> DataSample:
         if len(self.processed_file_names) > 0:
-            data = torch.load(self.processed_file_names[idx])
-            return data
+            path = self.processed_file_names[idx]
+            data = torch.load(path)
+            return DataSample(data, path)
 
-        data = torch.load(self.raw_file_names[idx])
-        return data
+        path = self.raw_file_names[idx]
+        data = torch.load(path)
+        return DataSample(data, path)
