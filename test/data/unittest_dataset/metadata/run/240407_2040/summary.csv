@@ -1,4 +1,0 @@
-Subset,Id,Species,Chromosomes,Seed,Probability,ProfileId,RunId,Version
-train,0,test_species.yaml,['chr1'],10001,0.930,,240407_2040,0.0.1
-train,1,test_species.yaml,['chr1'],10001,0.980,,240407_2040,0.0.1
-train,2,test_species.yaml,['chr2'],10001,1.000,,240407_2040,0.0.1

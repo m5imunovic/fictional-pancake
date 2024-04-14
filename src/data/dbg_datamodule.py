@@ -5,7 +5,8 @@ import pytorch_lightning as pl
 import torch_geometric.transforms as T
 from torch_geometric.loader import DataLoader
 
-from data.dbg_dataset import ClusteredDBGDataset, DBGDataset
+from data.cluster_dbg_dataset import ClusteredDBGDataset
+from data.dbg_dataset import DBGDataset
 
 
 class DBGDataModule(pl.LightningDataModule):
@@ -16,9 +17,10 @@ class DBGDataModule(pl.LightningDataModule):
         test_path: Optional[Path] = None,
         dataset_path: Optional[Path] = None,
         transform: T.Compose = None,
+        shuffle: bool = True,
         batch_size: int = 1,
         num_workers: int = 0,
-        num_clusters: int = 0,
+        num_clusters: int = 2,
     ):
         super().__init__()
 
@@ -29,17 +31,13 @@ class DBGDataModule(pl.LightningDataModule):
         self.test_ds: Optional[DBGDataset] = None
 
     @staticmethod
-    def path_helper(
-        path_specialized: Path, path_default: Path, path_descriptor: str
-    ) -> Path:
+    def path_helper(path_specialized: Path | None, path_default: Path, path_descriptor: str) -> Path:
         if not path_specialized:
             return Path(path_default) / path_descriptor
         return path_specialized
 
     def train_dataloader(self) -> DataLoader:
-        path = self.path_helper(
-            self.hparams.train_path, self.hparams.dataset_path, "train"
-        )
+        path = self.path_helper(self.hparams.train_path, self.hparams.dataset_path, "train")
         self.train_ds = ClusteredDBGDataset(
             root=path,
             transform=self.hparams.transform,
@@ -49,7 +47,7 @@ class DBGDataModule(pl.LightningDataModule):
             self.train_ds,
             batch_size=self.hparams.batch_size,
             num_workers=self.hparams.num_workers,
-            shuffle=False,
+            shuffle=self.hparams.shuffle,
         )
 
     def val_dataloader(self) -> DataLoader:
@@ -63,12 +61,11 @@ class DBGDataModule(pl.LightningDataModule):
             self.val_ds,
             batch_size=self.hparams.batch_size,
             num_workers=self.hparams.num_workers,
+            shuffle=self.hparams.shuffle,
         )
 
     def test_dataloader(self) -> DataLoader:
-        path = self.path_helper(
-            self.hparams.test_path, self.hparams.dataset_path, "test"
-        )
+        path = self.path_helper(self.hparams.test_path, self.hparams.dataset_path, "test")
         self.test_ds = DBGDataset(root=path, transform=self.hparams.transform)
         return DataLoader(
             self.test_ds,
@@ -78,9 +75,7 @@ class DBGDataModule(pl.LightningDataModule):
 
     def predict_dataloader(self) -> DataLoader:
         # TODO: implement predict dataloader for data without labels, for now use test data
-        path = self.path_helper(
-            self.hparams.test_path, self.hparams.dataset_path, "test"
-        )
+        path = self.path_helper(self.hparams.test_path, self.hparams.dataset_path, "test")
         self.test_ds = DBGDataset(root=path, transform=self.hparams.transform)
         return DataLoader(
             self.test_ds,
