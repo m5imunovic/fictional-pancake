@@ -12,11 +12,12 @@ def test_dbg_datamodule(unittest_ds_path):
 
     num_nodes = [1626, 3470, 3470, 1777, 1777, 1626]
     num_edges = [2363, 5057, 5057, 2584, 2584, 2363]
-    for l_idx, loader in enumerate(train_loader):
-        print(loader.num_nodes, loader.num_edges)
+    for l_idx, sample in enumerate(train_loader):
+        print(sample)
+        print(sample.data.num_nodes, sample.data.num_edges)
         print(num_nodes[l_idx], num_edges[l_idx])
-        assert loader.num_nodes == num_nodes[l_idx]
-        assert loader.num_edges == num_edges[l_idx]
+        assert sample.data.num_nodes == num_nodes[l_idx]
+        assert sample.data.num_edges == num_edges[l_idx]
 
 
 def test_dbg_datamodule_two_parts(unittest_ds_path):

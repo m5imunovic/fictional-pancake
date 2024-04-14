@@ -17,7 +17,7 @@ def partition_dataset(root: Path, num_parts: int, recursive: bool = False) -> li
 
     paths = []
     for idx in range(len(dataset)):
-        graph = dataset[idx]
+        graph = dataset[idx].data
         graph.node_ids = torch.arange(graph.num_nodes)
         cluster_dataset = ClusterData(
             data=to_undirected(graph.clone()),

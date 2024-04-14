@@ -3,10 +3,11 @@ from typing import Optional
 
 import pytorch_lightning as pl
 import torch_geometric.transforms as T
-from torch_geometric.loader import DataLoader
+from torch.utils.data import DataLoader
 
 from data.cluster_dbg_dataset import ClusteredDBGDataset
 from data.dbg_dataset import DBGDataset
+from data.dbg_dataset_entry import datasample_collate_fn
 
 
 class DBGDataModule(pl.LightningDataModule):
@@ -48,6 +49,7 @@ class DBGDataModule(pl.LightningDataModule):
             batch_size=self.hparams.batch_size,
             num_workers=self.hparams.num_workers,
             shuffle=self.hparams.shuffle,
+            collate_fn=datasample_collate_fn,
         )
 
     def val_dataloader(self) -> DataLoader:
@@ -62,6 +64,7 @@ class DBGDataModule(pl.LightningDataModule):
             batch_size=self.hparams.batch_size,
             num_workers=self.hparams.num_workers,
             shuffle=self.hparams.shuffle,
+            collate_fn=datasample_collate_fn,
         )
 
     def test_dataloader(self) -> DataLoader:
@@ -71,6 +74,7 @@ class DBGDataModule(pl.LightningDataModule):
             self.test_ds,
             batch_size=self.hparams.batch_size,
             num_workers=self.hparams.num_workers,
+            collate_fn=datasample_collate_fn,
         )
 
     def predict_dataloader(self) -> DataLoader:

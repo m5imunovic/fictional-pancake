@@ -4,8 +4,9 @@ from pathlib import Path
 from typing import Callable
 
 import torch
-from torch_geometric.data import Data, Dataset
+from torch_geometric.data import Dataset
 
+from data.dbg_dataset_entry import DataSample
 from transforms.partition_data import PartitionData
 
 logger = logging.getLogger(__name__)
@@ -58,5 +59,7 @@ class ClusteredDBGDataset(Dataset):
     def len(self) -> int:
         return len(self.processed_file_names)
 
-    def get(self, idx) -> Data:
-        return torch.load(self.processed_file_names[idx])
+    def get(self, idx) -> DataSample:
+        path = self.processed_file_names[idx]
+        data = torch.load(path)
+        return DataSample(data, path)
