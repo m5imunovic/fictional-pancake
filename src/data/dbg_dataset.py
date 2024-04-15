@@ -40,11 +40,13 @@ class DBGDataset(Dataset):
         return len(self.raw_file_names)
 
     def get(self, idx) -> DataSample:
+        path = self.raw_file_names[idx]
         if len(self.processed_file_names) > 0:
             path = self.processed_file_names[idx]
-            data = torch.load(path)
-            return DataSample(data, path)
-
-        path = self.raw_file_names[idx]
         data = torch.load(path)
+        data = data if self.transform is None else self.transform(data)
         return DataSample(data, path)
+
+    def __getitem__(self, idx) -> DataSample:
+        data = self.get(self.indices()[idx])
+        return data

@@ -30,9 +30,7 @@ def partition_results(results: list[torch.Tensor], dataset_info_path) -> list[di
         id_map_path = dataset_info_path / f"{idx}.idmap"
         with open(id_map_path) as handle:
             id_map = json.load(handle)
-        assert len(result) == len(
-            id_map
-        ), "Inference result and corresponding id map do not match."
+        assert len(result) == len(id_map), "Inference result and corresponding id map do not match."
         for i, val in enumerate(result.int()):
             hash_id = id_map[str(i)]
             key = mapper[val.item()]
@@ -71,7 +69,7 @@ def infere(cfg: DictConfig) -> None:
     # TODO: implement saving
 
     log.info("Experiment finished.")
-    return None
+    return
 
 
 @hydra.main(

@@ -8,9 +8,6 @@ defaults:
   - override /datamodules: datamodules
   - _self_
 
-# custom configs
-graph_type: ${graph.type}
-
 dataset_name: null
 
 baseline: E${trainer.max_epochs}_L${models.net.num_layers}_H${models.net.hidden_features}_C${datamodules.num_clusters}

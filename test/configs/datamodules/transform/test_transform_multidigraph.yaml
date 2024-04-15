@@ -1,0 +1,10 @@
+_target_: torch_geometric.transforms.compose.Compose
+transforms:
+  - _target_: transforms.degree_features.DegreeFeatures
+    in_degree: True
+  - _target_: transforms.degree_features.DegreeFeatures
+    in_degree: False
+  - _target_: transforms.col_zscore_features.ColZscoreFeatures
+    attrs: [x, edge_attr]
+  - _target_: transforms.binarize_targets.BinarizeTargets
+    attrs: [y]

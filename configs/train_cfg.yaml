@@ -24,6 +24,3 @@ test: True
 
 # we can provide previously trained model here
 ckpt_path: null
-
-# custom configs
-graph_type: #

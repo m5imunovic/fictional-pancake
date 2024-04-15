@@ -12,8 +12,6 @@ defaults:
 trainer:
   max_epochs: 1
 
-graph_type: ${graph.type}
-
 datamodules:
   num_clusters: 4
 

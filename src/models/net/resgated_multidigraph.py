@@ -21,9 +21,7 @@ class ResGatedMultiDiGraphNet(nn.Module):
         self.W21 = nn.Linear(edge_features, hidden_features, bias=True)
         self.W22 = nn.Linear(hidden_features, hidden_features, bias=True)
 
-        self.gate = LayeredGatedGCN(
-            num_layers=num_layers, hidden_features=hidden_features
-        )
+        self.gate = LayeredGatedGCN(num_layers=num_layers, hidden_features=hidden_features)
         self.ln1 = nn.LayerNorm(hidden_features)
         self.ln2 = nn.LayerNorm(hidden_features)
 
@@ -48,13 +46,11 @@ class ResGatedMultiDiGraphNet(nn.Module):
 class LayeredGatedGCN(nn.Module):
     def __init__(self, num_layers: int, hidden_features: int):
         super().__init__()
-        self.gnn = nn.ModuleList(
-            [GatedGCN(hidden_features=hidden_features) for _ in range(num_layers)]
-        )
+        self.gnn = nn.ModuleList(GatedGCN(hidden_features=hidden_features) for _ in range(num_layers))
 
-    def forward(self, h, edge_attr, edge_index):
+    def forward(self, h, edge_attr, edge_index, **kwargs):
         for gnn_layer in self.gnn:
-            h, edge_attr = gnn_layer(edge_index=edge_index, h=h, edge_attr=edge_attr)
+            h, edge_attr = gnn_layer(h=h, edge_attr=edge_attr, edge_index=edge_index)
         return h, edge_attr
 
 
@@ -83,7 +79,9 @@ class GatedGCN(MessagePassing):
         B3h = self.B3(h)
 
         row, col = edge_index
-        bw_edge_index = torch.vstack((col, row))
+        torch.vstack((col, row))
+        # bw_edge_index = torch.vstack((col, row))
+        # TODO: check what to do with bw index
 
         e_ji = B1h + B2h[row] + B3h[col]
         e_ik = B1h + B2h[col] + B3h[row]
@@ -97,8 +95,8 @@ class GatedGCN(MessagePassing):
         sigmoid_ji = torch.sigmoid(e_ji)
         sigmoid_ik = torch.sigmoid(e_ik)
 
-        h_ji = self.propagate(x=A2h, sigma=sigmoid_ji, edge_index=edge_index)
-        h_ik = self.propagate(x=A3h, sigma=sigmoid_ik, edge_index=bw_edge_index)
+        h_ji = self.propagate(edge_index=edge_index, x=A2h, sigma=sigmoid_ji)
+        h_ik = self.propagate(edge_index=edge_index, x=A3h, sigma=sigmoid_ik)
 
         h_new = A1h + h_ji + h_ik
         h_new = self.bn_h(F.relu(h_new))

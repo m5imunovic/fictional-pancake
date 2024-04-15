@@ -1,0 +1,5 @@
+defaults:
+  - test_model_ckpt.yaml
+  - test_progress_bar.yaml
+  #  - test_early_stopping.yaml
+  - _self_

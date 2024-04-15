@@ -61,10 +61,10 @@ class DBGLightningModule(pl.LightningModule):
     def common_step(self, batch, batch_idx, dataloader_idx=0):
         if isinstance(batch, list):
             batch = batch[0]
-        x = batch.x
-        edge_index = batch.edge_index
-        edge_attr = getattr(batch, "edge_attr", None)
-        y = batch.y
+        x = batch.data.x
+        edge_index = batch.data.edge_index
+        edge_attr = getattr(batch.data, "edge_attr", None)
+        y = batch.data.y
 
         scores = self.net(x=x.float(), edge_index=edge_index, edge_attr=edge_attr)
         expected_scores = y.float().unsqueeze(-1)
