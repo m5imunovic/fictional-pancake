@@ -10,7 +10,7 @@ defaults:
   - datamodules: test_datamodules.yaml
   - models: test_models.yaml
   - trainer: test_trainer_gpu.yaml
-  - experiment@_here_: exp_train_unittest
+  - experiment@_here_: inf_unittest
   - _self_
 
 # task name, used for logging dir name

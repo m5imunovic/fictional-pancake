@@ -47,6 +47,15 @@ def test_train_cfg(test_cfg_root, unittest_ds_path) -> DictConfig:
         return cfg
 
 
+@pytest.fixture(scope="function")
+def test_inference_cfg(test_cfg_root, unittest_ds_path) -> DictConfig:
+    data_dir = unittest_ds_path.parent.parent
+    overrides = [f"paths.data_dir={data_dir}"]
+    with initialize_config_dir(version_base=None, config_dir=str(test_cfg_root)):
+        cfg = compose(config_name="test_inf_config.yaml", overrides=overrides, return_hydra_config=True)
+        return cfg
+
+
 @pytest.fixture
 def tg_simple_data():
     x = torch.tensor([[1, 3, 5], [2, 4, 6]], dtype=torch.float).t()

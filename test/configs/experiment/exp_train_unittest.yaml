@@ -1,18 +1,20 @@
-# custom configs
+dataset_name: unittest_dataset
+
+baseline: E${trainer.max_epochs}_L${models.net.num_layers}_H${models.net.hidden_features}_C${datamodules.num_clusters}
+model_output_path: ${paths.model_dir}/baseline/${baseline}
+ckpt_path: null
+
+#loggers:
+#  wandb:
+#    name: ${baseline}
+#    group: train
+#    tags: ["resgated_mdg", "unittest_dataset"]
+#    reinit: True
+
 metadata:
   graph: multidigraph
 
-baseline: E${trainer.max_epochs}_L${models.net.num_layers}_H${models.net.hidden_features}_C${datamodules.num_clusters}
-
-dataset_name: unittest_dataset
-
-loggers:
-  wandb:
-    name: E${trainer.max_epochs}_${baseline}
-    group: train
-    tags: ["resgated_mdg", "unittest_dataset"]
-    reinit: True
-
-model_output_path: ${paths.model_dir}/multidigraph/paper/baseline/${baseline}
-
-ckpt_path: null
+# use False to skip if we should only do the testing
+train: True
+# evaluation on the test data
+test: False
