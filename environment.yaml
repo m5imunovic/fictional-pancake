@@ -25,6 +25,10 @@ dependencies:
   - numpy
   - scipy
 
+  #Analysis
+  - matplotlib
+  - pandas
+
   # Config
   - colorlog
   - hydra-core

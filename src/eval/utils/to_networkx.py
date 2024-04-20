@@ -17,9 +17,8 @@ def to_networkx(
     edge_attrs_dst: Iterable[Iterable[str]] | None = None,
     probabilities: dict | None = None,
 ) -> nx.MultiDiGraph:
-    r"""Converts a :class:`torch_geometric.data.Data` instance to a directed
-    :obj:`networkx.MultiDiGraph` if :attr:`to_multi` is set to :obj:`True`, or
-    a directed :obj:`networkx.DiGraph` otherwise.
+    r"""Converts a :class:`torch_geometric.data.Data` instance to a directed :obj:`networkx.MultiDiGraph` if
+    :attr:`to_multi` is set to :obj:`True`, or a directed :obj:`networkx.DiGraph` otherwise.
 
     Args:
         data (torch_geometric.data.Data or torch_geometric.data.HeteroData): A
@@ -36,7 +35,6 @@ def to_networkx(
         >>> data = Data(edge_index=edge_index, num_nodes=4)
         >>> to_networkx(data)
         <networkx.classes.digraph.DiGraph at 0x2713fdb40d0>
-
     """
     G = nx.MultiDiGraph()
 
@@ -46,13 +44,11 @@ def to_networkx(
     G.add_nodes_from(range(data.num_nodes))
 
     if edge_attrs_dst:
-        assert len(edge_attrs_dst) == len(
-            edge_attrs_src
-        ), "Mapping length does not match"
+        assert len(edge_attrs_dst) == len(edge_attrs_src), "Mapping length does not match"
 
     for edge_store in data.edge_stores:
         for i, (v, w) in enumerate(edge_store.edge_index.t().tolist()):
-            edge_kwargs: Dict[str, Any] = {}
+            edge_kwargs: dict[str, Any] = {}
             for j, key in enumerate(edge_attrs_src or []):
                 values = to_networkx_value(edge_store[key][i])
                 if edge_attrs_dst:
@@ -62,7 +58,7 @@ def to_networkx(
                     edge_kwargs[key] = values
 
             if probabilities:
-                edge_kwargs["p"] = float(probabilities[f"{i}"])
+                edge_kwargs["p"] = float(probabilities[i])
 
             G.add_edge(v, w, **edge_kwargs)
 

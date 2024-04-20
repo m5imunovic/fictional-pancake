@@ -46,8 +46,6 @@ class ColorMapGen:
             raise ValueError(f"Unsupported colormap name: {name}!")
 
     def generate_color(self, probability: float):
-        assert (
-            0.0 <= probability <= 1.0
-        ), f"Probability value must be in range [0., 1.], got {probability=}"
+        assert 0.0 <= probability <= 1.0, f"Probability value must be in range [0., 1.], got {probability=}"
         color = self.cmap(self.norm(probability))
         return mpl.colors.to_hex(color)
