@@ -1,16 +1,12 @@
-from typing import Optional
-
 import pytorch_lightning as pl
 import torch
 import torch.nn as nn
 from torchmetrics.classification import (
     BinaryAccuracy,
     BinaryConfusionMatrix,
-    BinaryF1Score,
-    BinaryPrecision,
-    BinaryPrecisionRecallCurve,
-    BinaryRecall,
 )
+
+from eval.inference_metrics import InferenceMetrics
 
 
 class DBGLightningModule(pl.LightningModule):
@@ -21,7 +17,7 @@ class DBGLightningModule(pl.LightningModule):
         scheduler: torch.optim.lr_scheduler.ReduceLROnPlateau,
         criterion: torch.nn.modules.loss._Loss,
         batch_size: int = 1,
-        threshold: Optional[float] = 0.5,
+        threshold: float = 0.5,
     ):
         super().__init__()
 
@@ -35,15 +31,8 @@ class DBGLightningModule(pl.LightningModule):
         self.val_acc = BinaryAccuracy()
 
         # test metrics
-        self.test_acc = BinaryAccuracy(threshold=threshold)
-        self.binary_precision = BinaryPrecision(threshold=threshold)
-        self.recall = BinaryRecall(threshold=threshold)
-        self.f1score = BinaryF1Score(threshold=threshold)
+        self.test_metrics = InferenceMetrics(threshold=threshold)
         self.cm = BinaryConfusionMatrix(threshold=threshold)
-        self.pr_curve = BinaryPrecisionRecallCurve()
-
-        self.scores_all = []
-        self.expected_scores_all = []
 
     def configure_optimizers(self) -> torch.optim.Optimizer:
         optimizer = self.hparams.optimizer(self.parameters())
@@ -59,8 +48,6 @@ class DBGLightningModule(pl.LightningModule):
         }
 
     def common_step(self, batch, batch_idx, dataloader_idx=0):
-        if isinstance(batch, list):
-            batch = batch[0]
         x = batch.data.x
         edge_index = batch.data.edge_index
         edge_attr = getattr(batch.data, "edge_attr", None)
@@ -111,45 +98,35 @@ class DBGLightningModule(pl.LightningModule):
             batch_size=self.batch_size,
             add_dataloader_idx=True,
         )
+        return loss
+
+    def on_validation_epoch_end(self):
+        output = self.val_acc.compute()
         self.log(
             "val/acc",
-            self.val_acc,
+            output,
             on_epoch=True,
             prog_bar=True,
             logger=True,
             batch_size=self.batch_size,
             add_dataloader_idx=True,
         )
-        return loss
+        self.val_acc.reset()
 
     def test_step(self, batch, batch_idx, dataloader_idx=0):
         scores, expected_scores = self.common_step(batch, batch_idx, dataloader_idx)
-        scores = torch.sigmoid(scores)
-        self.recall(scores, expected_scores.int())
-        self.binary_precision(scores, expected_scores.int())
-        self.test_acc(scores, expected_scores.int())
-        self.f1score(scores, expected_scores.int())
+        scores = torch.sigmoid(scores).reshape((1, -1))
+        expected_scores = expected_scores.reshape((1, -1))
+        self.test_metrics.update(scores, expected_scores.int(), batch.path)
         self.cm(scores, expected_scores.int())
-        self.pr_curve(scores, expected_scores.int())
-
-        self.scores_all.append(scores.cpu().clone())
-        self.expected_scores_all.append(expected_scores.cpu().clone())
+        # np.save(f"{storage_dir}/results/{batch.path[0].stem}", scores.cpu().numpy())
+        # np.save(f"{storage_dir}/results/expected_{batch.path[0].stem}", expected_scores.cpu().numpy())
 
     def on_test_end(self):
+        df = self.test_metrics.finalize()
+        print(df.to_string())
         if hasattr(self.logger, "log_table"):
-            columns = ["accuracy", "precision", "recall", "f1score"]
-            data = [
-                self.test_acc.compute(),
-                self.binary_precision.compute(),
-                self.recall.compute(),
-                self.f1score.compute(),
-            ]
-            data = [[entry.item() for entry in data]]
-            self.logger.log_table(
-                "test/metrics",
-                columns=columns,
-                data=data,
-            )
+            self.logger.log_table("test/metrics", dataframe=df)
         print(self.cm.compute())
 
     def predict_step(self, batch, batch_idx, dataloader_idx=0):
