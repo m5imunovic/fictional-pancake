@@ -72,3 +72,12 @@ def sign_transform():
         cfg = compose("transform_sign_digraph.yaml")
         sign_transform = hydra.utils.instantiate(cfg)
         return sign_transform
+
+
+@pytest.fixture
+def resgated_mdg_transform(test_cfg_root):
+    transforms_path = test_cfg_root / "datamodules" / "transform"
+    with initialize_config_dir(version_base=None, config_dir=str(transforms_path)):
+        cfg = compose("test_transform_multidigraph.yaml")
+        transform = hydra.utils.instantiate(cfg)
+        return transform

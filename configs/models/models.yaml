@@ -1,5 +1,4 @@
 defaults:
-  #- net: resgated_digraph
   - net: resgated_multidigraph
   - _self_
 

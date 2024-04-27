@@ -24,7 +24,7 @@ class DebuggerCfg:
     output_path: Path
     seed: int = 1
     neighborhood: int = 6
-    samples: int | None = 2
+    samples: int | None = None
     edge_id: int | None = None
     formats: list[str] | None = None
 
@@ -40,11 +40,12 @@ class InferenceDebugger:
         edge_attrs_src = ["edge_attr"]
         edge_attrs_dst = [["kc", "ln"]]
         logging.info("Creating graph...")
-        self.graph_nx = to_networkx(self.graph, edge_attrs_src, edge_attrs_dst, probabilities)
-        logging.info("Coloring graph...")
-        self._color_edges(self.graph_nx)
-        if render_self:
-            self.render_graph(self.graph_nx, "graph.gml")
+        ground_truth = self.graph.y
+        self.graph_nx = to_networkx(self.graph, edge_attrs_src, edge_attrs_dst, probabilities, ground_truth)
+        # logging.info("Coloring graph...")
+        # self._color_edges(self.graph_nx)
+        # if render_self:
+        #    self.render_graph(self.graph_nx, "graph.gml")
 
     @staticmethod
     def _load_graph(graph_file: Path):
@@ -127,7 +128,7 @@ def main(cfg: DictConfig) -> None:
     neighborhood = cfg.neighborhood
 
     if cfg.edge_id and cfg.samples:
-        raise ValueError("Only one of `edge_id` or `sample` can be used at same time")
+        raise ValueError("Only one of `edge_id` or `samples` can be used at same time")
     if cfg.edge_id is None and cfg.samples is None:
         raise ValueError("One of `edge_id` or `sample` must be defined")
 
