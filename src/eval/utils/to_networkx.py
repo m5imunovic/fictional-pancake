@@ -16,6 +16,7 @@ def to_networkx(
     edge_attrs_src: Iterable[str] | None = None,
     edge_attrs_dst: Iterable[Iterable[str]] | None = None,
     probabilities: dict | None = None,
+    ground_truth: Tensor | None = None,
 ) -> nx.MultiDiGraph:
     r"""Converts a :class:`torch_geometric.data.Data` instance to a directed :obj:`networkx.MultiDiGraph` if
     :attr:`to_multi` is set to :obj:`True`, or a directed :obj:`networkx.DiGraph` otherwise.
@@ -25,7 +26,9 @@ def to_networkx(
             homogeneous or heterogeneous data object.
         edge_attrs (iterable of str, optional): The edge attributes to be
             copied. (default: :obj:`None`)
-        probabilities: dict
+        probabilities (dict) : inference scores for edges
+        ground_truth (Tensor): multiplicities (int)
+
 
     Examples:
         >>> edge_index = torch.tensor([
@@ -45,6 +48,14 @@ def to_networkx(
 
     if edge_attrs_dst:
         assert len(edge_attrs_dst) == len(edge_attrs_src), "Mapping length does not match"
+    if ground_truth is not None:
+        ground_truth = ground_truth.bool().int().numpy()
+
+    def get_label(prob, gt):
+        greater = prob > 0.5
+        if gt == 0:
+            return "fp" if greater else "tn"
+        return "tp" if greater else "fn"
 
     for edge_store in data.edge_stores:
         for i, (v, w) in enumerate(edge_store.edge_index.t().tolist()):
@@ -58,7 +69,13 @@ def to_networkx(
                     edge_kwargs[key] = values
 
             if probabilities:
-                edge_kwargs["p"] = float(probabilities[i])
+                prob = float(probabilities[i])
+                edge_kwargs["p"] = prob
+                if ground_truth is not None:
+                    gt = ground_truth[i]
+                    edge_kwargs["gt"] = str(gt)
+                    lab = get_label(prob, gt)
+                    edge_kwargs["lab"] = lab
 
             G.add_edge(v, w, **edge_kwargs)
 

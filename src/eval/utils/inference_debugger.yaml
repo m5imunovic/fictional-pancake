@@ -1,7 +1,7 @@
 sample_path:
 scores_path:
 output_path: /tmp
-samples: 2
+samples: null
 seed: 1
 neighborhood: 6
 edge_id: null
