@@ -1,3 +1,5 @@
+from pathlib import Path
+import numpy as np
 import pytorch_lightning as pl
 import torch
 import torch.nn as nn
@@ -18,6 +20,7 @@ class DBGLightningModule(pl.LightningModule):
         criterion: torch.nn.modules.loss._Loss,
         batch_size: int = 1,
         threshold: float = 0.5,
+        storage_path: Path | None = None,
     ):
         super().__init__()
 
@@ -33,6 +36,7 @@ class DBGLightningModule(pl.LightningModule):
         # test metrics
         self.test_metrics = InferenceMetrics(threshold=threshold)
         self.cm = BinaryConfusionMatrix(threshold=threshold)
+        self.storage_path = storage_path
 
     def configure_optimizers(self) -> torch.optim.Optimizer:
         optimizer = self.hparams.optimizer(self.parameters())
@@ -119,8 +123,9 @@ class DBGLightningModule(pl.LightningModule):
         expected_scores = expected_scores.reshape((1, -1))
         self.test_metrics.update(scores, expected_scores.int(), batch.path)
         self.cm(scores, expected_scores.int())
-        # np.save(f"{storage_dir}/results/{batch.path[0].stem}", scores.cpu().numpy())
-        # np.save(f"{storage_dir}/results/expected_{batch.path[0].stem}", expected_scores.cpu().numpy())
+        if self.storage_path is not None:
+            np.save(f"{self.storage_path}/{batch.path[0].stem}", scores.cpu().numpy())
+            np.save(f"{self.storage_path}/expected_{batch.path[0].stem}", expected_scores.cpu().numpy())
 
     def on_test_end(self):
         df = self.test_metrics.finalize()

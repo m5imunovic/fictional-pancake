@@ -55,8 +55,9 @@ class LayeredGatedGCN(nn.Module):
 
 
 class GatedGCN(MessagePassing):
-    def __init__(self, hidden_features: int):
+    def __init__(self, hidden_features: int, batch_norm: bool = True):
         super().__init__(aggr="add")
+        self.batch_norm = batch_norm
 
         self.A1 = nn.Linear(hidden_features, hidden_features)
         self.A2 = nn.Linear(hidden_features, hidden_features)
@@ -66,8 +67,9 @@ class GatedGCN(MessagePassing):
         self.B2 = nn.Linear(hidden_features, hidden_features)
         self.B3 = nn.Linear(hidden_features, hidden_features)
 
-        self.bn_h = nn.LayerNorm(hidden_features)
-        self.bn_e = nn.LayerNorm(hidden_features)
+        if self.batch_norm:
+            self.bn_h = nn.LayerNorm(hidden_features)
+            self.bn_e = nn.LayerNorm(hidden_features)
 
     def forward(self, h, edge_attr, edge_index):
         A1h = self.A1(h)
@@ -79,15 +81,18 @@ class GatedGCN(MessagePassing):
         B3h = self.B3(h)
 
         row, col = edge_index
-        torch.vstack((col, row))
+        # torch.vstack((col, row))
         # bw_edge_index = torch.vstack((col, row))
         # TODO: check what to do with bw index
 
         e_ji = B1h + B2h[row] + B3h[col]
         e_ik = B1h + B2h[col] + B3h[row]
 
-        e_ji = self.bn_e(F.relu(e_ji))
-        e_ik = self.bn_e(F.relu(e_ik))
+        e_ji = F.relu(e_ji)
+        e_ik = F.relu(e_ik)
+        if self.batch_norm:
+            e_ji = self.bn_e(e_ji)
+            e_ik = self.bn_e(e_ik)
 
         e_ji = edge_attr + e_ji
         e_ik = edge_attr + e_ik
@@ -99,7 +104,9 @@ class GatedGCN(MessagePassing):
         h_ik = self.propagate(edge_index=edge_index, x=A3h, sigma=sigmoid_ik)
 
         h_new = A1h + h_ji + h_ik
-        h_new = self.bn_h(F.relu(h_new))
+        h_new = F.relu(h_new)
+        if self.batch_norm:
+            h_new = self.bn_h(h_new)
         h = h + h_new
 
         return h, e_ji

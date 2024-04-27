@@ -3,6 +3,7 @@ defaults:
   - _self_
 
 _target_: models.dbg_light_module.DBGLightningModule
+storage_path: null
 
 optimizer:
   _target_: torch.optim.Adam
