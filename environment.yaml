@@ -27,6 +27,7 @@ dependencies:
 
   #Analysis
   - matplotlib
+  - networkx
   - pandas
 
   # Config

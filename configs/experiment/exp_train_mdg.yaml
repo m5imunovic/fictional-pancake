@@ -1,0 +1,15 @@
+dataset_name: unittest_dataset
+
+trainer:
+  max_epochs: 2
+models:
+  net:
+    num_layers: 3
+    hidden_features: 16
+  threshold: 0.5
+datamodules:
+  num_clusters: 2
+
+baseline: E${trainer.max_epochs}_L${models.net.num_layers}_H${models.net.hidden_features}_C${datamodules.num_clusters}
+
+ckpt_path: null
