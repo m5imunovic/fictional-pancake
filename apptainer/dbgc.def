@@ -1,0 +1,43 @@
+Bootstrap: docker
+From: nvidia/cuda:12.1.0-devel-ubuntu22.04
+
+%files
+    $HOME/work/fictional-pancake/ /work/
+
+%post
+    apt update -y
+    apt autoremove -y
+    DEBIAN_FRONTEND=noninteractive apt install -y python3.11 python3.11-venv vim git curl
+    DEBIAN_FRONTEND=noninteractive TZ="Europe/Berlin" apt install -y tzdata
+    curl -L -O "https://github.com/conda-forge/miniforge/releases/latest/download/Miniforge3-$(uname)-$(uname -m).sh"
+    bash Miniforge3-$(uname)-$(uname -m).sh -b
+    /root/miniforge3/bin/mamba env create --file=/work/fictional-pancake/environment.yaml
+    /root/miniforge3/bin/mamba init
+
+    mkdir -p /work
+    # clear warnings
+    touch /etc/environment
+    mkdir -p /lustre/group
+    touch /usr/bin/nvidia-smi
+    touch /usr/bin/nvidia-debugdump
+    touch /usr/bin/nvidia-persistenced
+    touch /usr/bin/nvidia-cuda-mps-control
+    touch /usr/bin/nvidia-cuda-mps-server
+    mkdir -p /var/run/nvidia-persistenced/
+    touch /var/run/nvidia-persistenced/socket
+
+%environment
+    export LC_ALL=C
+    export PYTHONPATH="$HOME/work/fictional-pancake/src"
+    export PROJECT_ROOT="$HOME/work/fictional-pancake"
+    export WANDB_DIR="$HOME/data"
+    export PATH="/root/miniforge3/bin:$PATH"
+
+%runscript
+    cd $PROJECT_ROOT
+    mamba run -n fenv python3 $@
+    #python3 $@
+
+%labels
+    Author m5imunovic
+    Version v0.0.2
