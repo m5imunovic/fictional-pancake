@@ -43,6 +43,9 @@ class InferenceMetrics:
                 value = self.metrics[name].compute()
                 data.append(value)
         data = torch.stack(data).T
+        if data.dim() == 1:
+            # to avoid "shape of passed value is X, indices imply Y" error
+            data = data.unsqueeze(0)
 
         df = pd.DataFrame(columns=InferenceMetrics.columns, data=data.tolist())
         df.insert(loc=0, column="Name", value=self.names)
