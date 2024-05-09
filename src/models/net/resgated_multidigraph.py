@@ -43,9 +43,11 @@ class ResGatedMultiDiGraphNet(nn.Module):
 
 
 class LayeredGatedGCN(nn.Module):
-    def __init__(self, num_layers: int, hidden_features: int):
+    def __init__(self, num_layers: int, hidden_features: int, gate_norm: str = "feature"):
         super().__init__()
-        self.gnn = nn.ModuleList(GatedGCN(hidden_features=hidden_features) for _ in range(num_layers))
+        self.gnn = nn.ModuleList(
+            GatedGCN(hidden_features=hidden_features, gate_norm=gate_norm) for _ in range(num_layers)
+        )
 
     def forward(self, h, edge_attr, edge_index, **kwargs):
         for gnn_layer in self.gnn:
@@ -54,8 +56,9 @@ class LayeredGatedGCN(nn.Module):
 
 
 class GatedGCN(MessagePassing):
-    def __init__(self, hidden_features: int, layer_norm: bool = True):
+    def __init__(self, hidden_features: int, gate_norm: str, layer_norm: bool = True):
         super().__init__(aggr="add")
+        self.gate_norm = gate_norm
         self.layer_norm = layer_norm
 
         self.A1 = nn.Linear(hidden_features, hidden_features)
@@ -80,6 +83,7 @@ class GatedGCN(MessagePassing):
         B3h = self.B3(h)
 
         src, dst = edge_index
+        bw_edge_index = torch.vstack((dst, src))
 
         e_fw = B1h + B2h[src] + B3h[dst]
         e_bw = B1h + B2h[dst] + B3h[src]
@@ -99,7 +103,7 @@ class GatedGCN(MessagePassing):
         sigmoid_bw = torch.sigmoid(e_bw)
 
         h_fw = self.propagate(edge_index=edge_index, x=A2h, sigma=sigmoid_fw)
-        h_bw = self.propagate(edge_index=edge_index, x=A3h, sigma=sigmoid_bw)
+        h_bw = self.propagate(edge_index=bw_edge_index, x=A3h, sigma=sigmoid_bw)
 
         h_new = A1h + h_fw + h_bw
         h_new = F.relu(h_new)
@@ -112,4 +116,7 @@ class GatedGCN(MessagePassing):
     def message(self, x_j, sigma) -> Tensor:
         # in pyg (j->i) represents the flow from source to target and (i->j) the reverse
         # generally, i is the node that accumulates information and {j} its neighbors
-        return (x_j * sigma) / (torch.sum(sigma, dim=1).unsqueeze(dim=1) + 1e-6)
+        message = x_j * sigma
+        if self.gate_norm == "feature":
+            message = message / (torch.sum(sigma, dim=1).unsqueeze(dim=1) + 1e-6)
+        return message
