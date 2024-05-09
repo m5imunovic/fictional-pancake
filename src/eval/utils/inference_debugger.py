@@ -115,13 +115,18 @@ def get_erroneous_ids(scores_path, expected_scores_path):
 
 @hydra.main(version_base=None, config_path=".", config_name="inference_debugger.yaml")
 def main(cfg: DictConfig) -> None:
-    assert cfg.sample_path, "Missing path to graph"
     assert cfg.scores_path, "Missing path to the inference scores"
 
-    graph_path = Path(cfg.sample_path)
-    idx = graph_path.stem
     scores_path = Path(cfg.scores_path)
+    idx = scores_path.stem
     expected_scores_path = scores_path.parent / f"expected_{scores_path.name}"
+    if cfg.sample_path is None:
+        expected_sample_path = scores_path.parent / f"transformed_{scores_path.stem}.pt"
+        if not expected_sample_path.exists():
+            assert cfg.sample_path, f"Missing path to graph, could not find alternative path {expected_sample_path}"
+        graph_path = Path(expected_sample_path)
+    else:
+        graph_path = Path(cfg.sample_path)
     assert expected_scores_path.exists(), f"{expected_scores_path} does not exist"
 
     np.random.seed(cfg.seed)

@@ -126,6 +126,7 @@ class DBGLightningModule(pl.LightningModule):
         if self.storage_path is not None:
             np.save(f"{self.storage_path}/{batch.path[0].stem}", scores.cpu().numpy())
             np.save(f"{self.storage_path}/expected_{batch.path[0].stem}", expected_scores.cpu().numpy())
+            torch.save(batch.data, f"{self.storage_path}/transformed_{batch.path[0].stem}.pt")
 
     def on_test_end(self):
         df = self.test_metrics.finalize()

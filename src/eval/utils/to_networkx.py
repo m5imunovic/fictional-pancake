@@ -49,6 +49,7 @@ def to_networkx(
     if edge_attrs_dst:
         assert len(edge_attrs_dst) == len(edge_attrs_src), "Mapping length does not match"
     if ground_truth is not None:
+        y = ground_truth.clone().numpy()
         ground_truth = ground_truth.bool().int().numpy()
 
     def get_label(prob, gt):
@@ -76,6 +77,7 @@ def to_networkx(
                     edge_kwargs["gt"] = str(gt)
                     lab = get_label(prob, gt)
                     edge_kwargs["lab"] = lab
+                    edge_kwargs["y"] = int(y[i])
 
             G.add_edge(v, w, **edge_kwargs)
 

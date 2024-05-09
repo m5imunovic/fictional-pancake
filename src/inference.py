@@ -47,6 +47,9 @@ def infere(cfg: DictConfig) -> None:
     Args:
         cfg (DictConfig): Configurations for inference
     """
+    if cfg.paths.data_dir is None:
+        log.error("Paths data dir is not defined. Aborting!")
+        return
     log.info("Init data module...")
     datamodule: pl.LightningDataModule = hydra.utils.instantiate(cfg.datamodules)
     log.info("Init model...")
