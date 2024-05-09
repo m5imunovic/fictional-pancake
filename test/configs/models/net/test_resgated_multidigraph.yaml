@@ -3,4 +3,3 @@ num_layers: 2
 node_features: 2
 edge_features: 2
 hidden_features: 16
-batch_norm: False

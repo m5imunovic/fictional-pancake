@@ -12,7 +12,6 @@ class ResGatedMultiDiGraphNet(nn.Module):
         node_features: int,
         edge_features: int,
         hidden_features: int,
-        batch_norm: bool = False,
     ):
         super().__init__()
 
@@ -55,9 +54,9 @@ class LayeredGatedGCN(nn.Module):
 
 
 class GatedGCN(MessagePassing):
-    def __init__(self, hidden_features: int, batch_norm: bool = True):
+    def __init__(self, hidden_features: int, layer_norm: bool = True):
         super().__init__(aggr="add")
-        self.batch_norm = batch_norm
+        self.layer_norm = layer_norm
 
         self.A1 = nn.Linear(hidden_features, hidden_features)
         self.A2 = nn.Linear(hidden_features, hidden_features)
@@ -67,9 +66,9 @@ class GatedGCN(MessagePassing):
         self.B2 = nn.Linear(hidden_features, hidden_features)
         self.B3 = nn.Linear(hidden_features, hidden_features)
 
-        if self.batch_norm:
-            self.bn_h = nn.LayerNorm(hidden_features)
-            self.bn_e = nn.LayerNorm(hidden_features)
+        if self.layer_norm:
+            self.ln_h = nn.LayerNorm(hidden_features)
+            self.ln_e = nn.LayerNorm(hidden_features)
 
     def forward(self, h, edge_attr, edge_index):
         A1h = self.A1(h)
@@ -88,9 +87,9 @@ class GatedGCN(MessagePassing):
         e_fw = F.relu(e_fw)
         e_bw = F.relu(e_bw)
 
-        if self.batch_norm:
-            e_fw = self.bn_e(e_fw)
-            e_bw = self.bn_e(e_bw)
+        if self.layer_norm:
+            e_fw = self.ln_e(e_fw)
+            e_bw = self.ln_e(e_bw)
 
         # residual connection
         e_fw = edge_attr + e_fw
@@ -104,8 +103,8 @@ class GatedGCN(MessagePassing):
 
         h_new = A1h + h_fw + h_bw
         h_new = F.relu(h_new)
-        if self.batch_norm:
-            h_new = self.bn_h(h_new)
+        if self.layer_norm:
+            h_new = self.ln_h(h_new)
         h = h + h_new
 
         return h, e_fw
