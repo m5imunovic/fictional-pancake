@@ -80,36 +80,37 @@ class GatedGCN(MessagePassing):
         B2h = self.B2(h)
         B3h = self.B3(h)
 
-        row, col = edge_index
-        # torch.vstack((col, row))
-        # bw_edge_index = torch.vstack((col, row))
-        # TODO: check what to do with bw index
+        src, dst = edge_index
 
-        e_ji = B1h + B2h[row] + B3h[col]
-        e_ik = B1h + B2h[col] + B3h[row]
+        e_fw = B1h + B2h[src] + B3h[dst]
+        e_bw = B1h + B2h[dst] + B3h[src]
 
-        e_ji = F.relu(e_ji)
-        e_ik = F.relu(e_ik)
+        e_fw = F.relu(e_fw)
+        e_bw = F.relu(e_bw)
+
         if self.batch_norm:
-            e_ji = self.bn_e(e_ji)
-            e_ik = self.bn_e(e_ik)
+            e_fw = self.bn_e(e_fw)
+            e_bw = self.bn_e(e_bw)
 
-        e_ji = edge_attr + e_ji
-        e_ik = edge_attr + e_ik
+        # residual connection
+        e_fw = edge_attr + e_fw
+        e_bw = edge_attr + e_bw
 
-        sigmoid_ji = torch.sigmoid(e_ji)
-        sigmoid_ik = torch.sigmoid(e_ik)
+        sigmoid_fw = torch.sigmoid(e_fw)
+        sigmoid_bw = torch.sigmoid(e_bw)
 
-        h_ji = self.propagate(edge_index=edge_index, x=A2h, sigma=sigmoid_ji)
-        h_ik = self.propagate(edge_index=edge_index, x=A3h, sigma=sigmoid_ik)
+        h_fw = self.propagate(edge_index=edge_index, x=A2h, sigma=sigmoid_fw)
+        h_bw = self.propagate(edge_index=edge_index, x=A3h, sigma=sigmoid_bw)
 
-        h_new = A1h + h_ji + h_ik
+        h_new = A1h + h_fw + h_bw
         h_new = F.relu(h_new)
         if self.batch_norm:
             h_new = self.bn_h(h_new)
         h = h + h_new
 
-        return h, e_ji
+        return h, e_fw
 
     def message(self, x_j, sigma) -> Tensor:
+        # in pyg (j->i) represents the flow from source to target and (i->j) the reverse
+        # generally, i is the node that accumulates information and {j} its neighbors
         return (x_j * sigma) / (torch.sum(sigma, dim=1).unsqueeze(dim=1) + 1e-6)
