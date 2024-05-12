@@ -5,7 +5,7 @@
 # bigger than zero get clamped to one
 _target_: torch_geometric.transforms.compose.Compose
 transforms:
-  - _target_: transforms.add_positional_enconding.AddRandomWalkPE
+  - _target_: transforms.add_positional_encoding.AddRandomWalkPE
     walk_length: 5
   - _target_: transforms.col_zscore_features.ColZscoreFeatures
     attrs: [edge_attr]
