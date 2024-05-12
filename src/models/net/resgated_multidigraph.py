@@ -12,7 +12,6 @@ class ResGatedMultiDiGraphNet(nn.Module):
         node_features: int,
         edge_features: int,
         hidden_features: int,
-        batch_norm: bool = False,
     ):
         super().__init__()
 
@@ -44,9 +43,11 @@ class ResGatedMultiDiGraphNet(nn.Module):
 
 
 class LayeredGatedGCN(nn.Module):
-    def __init__(self, num_layers: int, hidden_features: int):
+    def __init__(self, num_layers: int, hidden_features: int, gate_norm: str = "feature"):
         super().__init__()
-        self.gnn = nn.ModuleList(GatedGCN(hidden_features=hidden_features) for _ in range(num_layers))
+        self.gnn = nn.ModuleList(
+            GatedGCN(hidden_features=hidden_features, gate_norm=gate_norm) for _ in range(num_layers)
+        )
 
     def forward(self, h, edge_attr, edge_index, **kwargs):
         for gnn_layer in self.gnn:
@@ -55,9 +56,10 @@ class LayeredGatedGCN(nn.Module):
 
 
 class GatedGCN(MessagePassing):
-    def __init__(self, hidden_features: int, batch_norm: bool = True):
+    def __init__(self, hidden_features: int, gate_norm: str, layer_norm: bool = True):
         super().__init__(aggr="add")
-        self.batch_norm = batch_norm
+        self.gate_norm = gate_norm
+        self.layer_norm = layer_norm
 
         self.A1 = nn.Linear(hidden_features, hidden_features)
         self.A2 = nn.Linear(hidden_features, hidden_features)
@@ -67,9 +69,9 @@ class GatedGCN(MessagePassing):
         self.B2 = nn.Linear(hidden_features, hidden_features)
         self.B3 = nn.Linear(hidden_features, hidden_features)
 
-        if self.batch_norm:
-            self.bn_h = nn.LayerNorm(hidden_features)
-            self.bn_e = nn.LayerNorm(hidden_features)
+        if self.layer_norm:
+            self.ln_h = nn.LayerNorm(hidden_features)
+            self.ln_e = nn.LayerNorm(hidden_features)
 
     def forward(self, h, edge_attr, edge_index):
         A1h = self.A1(h)
@@ -80,36 +82,41 @@ class GatedGCN(MessagePassing):
         B2h = self.B2(h)
         B3h = self.B3(h)
 
-        row, col = edge_index
-        # torch.vstack((col, row))
-        # bw_edge_index = torch.vstack((col, row))
-        # TODO: check what to do with bw index
+        src, dst = edge_index
+        bw_edge_index = torch.vstack((dst, src))
 
-        e_ji = B1h + B2h[row] + B3h[col]
-        e_ik = B1h + B2h[col] + B3h[row]
+        e_fw = B1h + B2h[src] + B3h[dst]
+        e_bw = B1h + B2h[dst] + B3h[src]
 
-        e_ji = F.relu(e_ji)
-        e_ik = F.relu(e_ik)
-        if self.batch_norm:
-            e_ji = self.bn_e(e_ji)
-            e_ik = self.bn_e(e_ik)
+        e_fw = F.relu(e_fw)
+        e_bw = F.relu(e_bw)
 
-        e_ji = edge_attr + e_ji
-        e_ik = edge_attr + e_ik
+        if self.layer_norm:
+            e_fw = self.ln_e(e_fw)
+            e_bw = self.ln_e(e_bw)
 
-        sigmoid_ji = torch.sigmoid(e_ji)
-        sigmoid_ik = torch.sigmoid(e_ik)
+        # residual connection
+        e_fw = edge_attr + e_fw
+        e_bw = edge_attr + e_bw
 
-        h_ji = self.propagate(edge_index=edge_index, x=A2h, sigma=sigmoid_ji)
-        h_ik = self.propagate(edge_index=edge_index, x=A3h, sigma=sigmoid_ik)
+        sigmoid_fw = torch.sigmoid(e_fw)
+        sigmoid_bw = torch.sigmoid(e_bw)
 
-        h_new = A1h + h_ji + h_ik
+        h_fw = self.propagate(edge_index=edge_index, x=A2h, sigma=sigmoid_fw)
+        h_bw = self.propagate(edge_index=bw_edge_index, x=A3h, sigma=sigmoid_bw)
+
+        h_new = A1h + h_fw + h_bw
         h_new = F.relu(h_new)
-        if self.batch_norm:
-            h_new = self.bn_h(h_new)
+        if self.layer_norm:
+            h_new = self.ln_h(h_new)
         h = h + h_new
 
-        return h, e_ji
+        return h, e_fw
 
     def message(self, x_j, sigma) -> Tensor:
-        return (x_j * sigma) / (torch.sum(sigma, dim=1).unsqueeze(dim=1) + 1e-6)
+        # in pyg (j->i) represents the flow from source to target and (i->j) the reverse
+        # generally, i is the node that accumulates information and {j} its neighbors
+        message = x_j * sigma
+        if self.gate_norm == "feature":
+            message = message / (torch.sum(sigma, dim=1).unsqueeze(dim=1) + 1e-6)
+        return message

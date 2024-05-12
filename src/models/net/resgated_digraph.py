@@ -9,7 +9,6 @@ class ResGatedDiGraphNet(nn.Module):
         num_layers: int,
         node_features: int,
         hidden_features: int,
-        batch_norm: bool = False,
     ):
         super().__init__()
 
@@ -45,9 +44,7 @@ class LayeredResGatedGraphConv(nn.Module):
         super().__init__()
         self.gnn = nn.ModuleList(
             [
-                ResGatedGraphConv(
-                    in_channels=hidden_features, out_channels=hidden_features, flow=flow
-                )
+                ResGatedGraphConv(in_channels=hidden_features, out_channels=hidden_features, flow=flow)
                 for _ in range(num_layers)
             ]
         )

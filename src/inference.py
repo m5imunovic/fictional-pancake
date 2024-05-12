@@ -11,6 +11,7 @@ from utils.logger import get_logger
 from utils.path_helpers import get_config_root
 
 log = get_logger(__name__)
+torch.multiprocessing.set_start_method("spawn", force=True)
 
 
 def partition_results(results: list[torch.Tensor], dataset_info_path) -> list[dict]:

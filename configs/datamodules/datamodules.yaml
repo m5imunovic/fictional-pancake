@@ -1,6 +1,6 @@
 defaults:
   - _self_
-  - transform: transform_multidigraph.yaml
+  - transform: tf_pe_zscore_bin.yaml
 
 _target_: data.dbg_datamodule.DBGDataModule
 dataset_path: ${paths.dataset_dir}/${dataset_name}

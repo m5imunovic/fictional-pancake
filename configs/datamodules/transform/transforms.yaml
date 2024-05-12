@@ -1,5 +1,4 @@
 _target_: torch_geometric.transforms.compose.Compose
 transforms:
-  #- _target_: torch_geometric.transforms.normalize_features.NormalizeFeatures
   - _target_: transforms.col_zscore_features.ColZscoreFeatures
     attrs: [x, edge_attrs]

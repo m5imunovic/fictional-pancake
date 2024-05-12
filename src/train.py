@@ -5,6 +5,7 @@ from typing import Optional
 
 import hydra
 import pytorch_lightning as pl
+import torch
 import wandb
 from hydra.core.hydra_config import HydraConfig
 from omegaconf import DictConfig, OmegaConf
@@ -14,6 +15,9 @@ from utils.logger import get_logger
 from utils.path_helpers import get_config_root
 
 log = get_logger(__name__)
+
+
+torch.multiprocessing.set_start_method("spawn", force=True)
 
 
 def upload_model_to_wandb(model_path, artifact_name, dataset_name, metadata=None):
