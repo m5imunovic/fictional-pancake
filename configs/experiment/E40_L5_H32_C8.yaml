@@ -1,0 +1,24 @@
+dataset_name: chm13_real_N9_dataset
+
+trainer:
+  max_epochs: 40
+
+models:
+  net:
+    num_layers: 5
+    hidden_features: 32
+  threshold: 0.5
+
+datamodules:
+  num_clusters: 8
+
+baseline: E${trainer.max_epochs}_L${models.net.num_layers}_H${models.net.hidden_features}_C${datamodules.num_clusters}
+
+ckpt_path: ${paths.storage_dir}/models/${baseline}/best_model.ckpt
+
+loggers:
+  wandb:
+    name: inference_${dataset_name}
+    group: inference_${baseline}_T${models.threshold}
+    tags: ["resgated_mdg"]
+    offline: True

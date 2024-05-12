@@ -1,0 +1,13 @@
+# Adds in and out degree features to nodes and normalizes
+# both node and edge features using Z-Score
+#
+# Target gets binarized so that all multiplicities values
+# bigger than zero get clamped to one
+_target_: torch_geometric.transforms.compose.Compose
+transforms:
+  - _target_: transforms.add_positional_enconding.AddRandomWalkPE
+    walk_length: 5
+  - _target_: transforms.col_zscore_features.ColZscoreFeatures
+    attrs: [edge_attr]
+  - _target_: transforms.binarize_targets.BinarizeTargets
+    attrs: [y]
