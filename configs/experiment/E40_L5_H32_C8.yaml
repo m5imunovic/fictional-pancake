@@ -14,11 +14,4 @@ datamodules:
 
 baseline: E${trainer.max_epochs}_L${models.net.num_layers}_H${models.net.hidden_features}_C${datamodules.num_clusters}
 
-ckpt_path: ${paths.storage_dir}/models/${baseline}/best_model.ckpt
-
-loggers:
-  wandb:
-    name: inference_${dataset_name}
-    group: inference_${baseline}_T${models.threshold}
-    tags: ["resgated_mdg"]
-    offline: True
+ckpt_path: #${paths.storage_dir}/models/${baseline}/best_model.ckpt

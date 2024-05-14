@@ -14,3 +14,13 @@ defaults:
 
 # task name, used as output directory path
 task_name: "inference"
+
+# checkpoint path, should rename it to differentiate training/inference
+ckpt_path: ${paths.storage_dir}/models/${baseline}/best_model.ckpt
+# dataset_name and baseline are defined in experiment
+loggers:
+  wandb:
+    name: inference_${dataset_name}
+    group: inference_${baseline}_T${models.threshold}
+    tags: ["resgated_mdg"]
+    offline: False
