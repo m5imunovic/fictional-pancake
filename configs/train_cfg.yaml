@@ -15,6 +15,16 @@ defaults:
 
 # task name, used as output directory path
 task_name: "train"
+metadata:
+  graph: multidigraph
+
+# dataset_name and baseline are defined in experiment config
+loggers:
+  wandb:
+    name: train_${dataset_name}
+    group: train_${baseline}_T${models.threshold}
+    tags: ["resgated_mdg"]
+    offline: True
 
 #use False to skip if we should only do the testing
 train: True
@@ -24,3 +34,5 @@ test: True
 
 # we can provide previously trained model here
 ckpt_path: null
+# where do we want to store the best model?
+model_output_path: ${paths.storage_dir}/models/${baseline}/best_model.ckpt

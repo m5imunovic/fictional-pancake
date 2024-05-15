@@ -9,6 +9,7 @@ from torchmetrics.classification import (
 )
 
 from eval.inference_metrics import InferenceMetrics
+from models.loss.rmse_loss import RMSELoss
 
 
 class DBGLightningModule(pl.LightningModule):
@@ -20,6 +21,7 @@ class DBGLightningModule(pl.LightningModule):
         criterion: torch.nn.modules.loss._Loss,
         batch_size: int = 1,
         threshold: float = 0.5,
+        offset: int = 7,  # in regression setting we use this to adapt range for softmax operation
         storage_path: Path | None = None,
     ):
         super().__init__()
@@ -119,6 +121,11 @@ class DBGLightningModule(pl.LightningModule):
 
     def test_step(self, batch, batch_idx, dataloader_idx=0):
         scores, expected_scores = self.common_step(batch, batch_idx, dataloader_idx)
+        if isinstance(self.hparams.criterion, RMSELoss):
+            # We define a hyperparameter offset which shifts the range to negative values
+            # After that we will normalize with sigmoid so everything negative becomes "falsy"
+            # This way we can still use metrics as for classification case
+            scores = scores - self.hparams.offset
         scores = torch.sigmoid(scores).reshape((1, -1))
         expected_scores = expected_scores.reshape((1, -1))
         self.test_metrics.update(scores, expected_scores.int(), batch.path)

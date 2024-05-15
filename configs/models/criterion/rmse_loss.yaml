@@ -1,0 +1,2 @@
+_target_: models.loss.rmse_loss.RMSELoss
+reduce: mean
