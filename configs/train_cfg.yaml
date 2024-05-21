@@ -24,15 +24,15 @@ loggers:
     name: train_${dataset_name}
     group: train_${baseline}_T${models.threshold}
     tags: ["resgated_mdg"]
-    offline: True
+    offline: true
 
 #use False to skip if we should only do the testing
-train: True
+train: true
 
 # evaluation on the test data
-test: True
+test: false
 
 # we can provide previously trained model here
 ckpt_path: null
-# where do we want to store the best model?
-model_output_path: ${paths.storage_dir}/models/${baseline}/best_model.ckpt
+# dir where do we want to store the best model?
+model_output_path: ${paths.storage_dir}/models/${baseline}/

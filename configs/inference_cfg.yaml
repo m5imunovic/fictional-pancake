@@ -21,6 +21,6 @@ ckpt_path: ${paths.storage_dir}/models/${baseline}/best_model.ckpt
 loggers:
   wandb:
     name: inference_${dataset_name}
-    group: inference_${baseline}_T${models.threshold}
+    group: inference_${baseline}_T${models.offset}
     tags: ["resgated_mdg"]
-    offline: False
+    offline: true

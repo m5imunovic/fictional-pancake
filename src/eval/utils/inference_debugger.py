@@ -152,7 +152,7 @@ def main(cfg: DictConfig) -> None:
 
     for edge_id in edge_ids:
         if edge_id not in err_ids:
-            raise ValueError(f"Edge id {edge_id} not in erroneous ids of graph")
+            logging.warning(f"Edge id {edge_id} not in erroneous ids of graph")
         logging.info(f"Selected {edge_id}")
         subgraph = inf_deb.query_subgraph(edge_id, neighborhood)
         inf_deb.render_graph(subgraph, name=f"{output_path}/{idx}_{edge_id}_subgraph")

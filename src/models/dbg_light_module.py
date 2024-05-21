@@ -7,6 +7,7 @@ from torchmetrics.classification import (
     BinaryAccuracy,
     BinaryConfusionMatrix,
 )
+from torchmetrics.regression import MeanSquaredError
 
 from eval.inference_metrics import InferenceMetrics
 from models.loss.rmse_loss import RMSELoss
@@ -21,7 +22,7 @@ class DBGLightningModule(pl.LightningModule):
         criterion: torch.nn.modules.loss._Loss,
         batch_size: int = 1,
         threshold: float = 0.5,
-        offset: int = 7,  # in regression setting we use this to adapt range for softmax operation
+        offset: int = 0.5,  # in regression setting we use this to adapt range for softmax operation
         storage_path: Path | None = None,
     ):
         super().__init__()
@@ -30,10 +31,16 @@ class DBGLightningModule(pl.LightningModule):
         self.net = net
         self.batch_size = batch_size
 
-        # training metrics
-        self.train_acc = BinaryAccuracy()
-        # validation metrics
-        self.val_acc = BinaryAccuracy()
+        if isinstance(self.hparams.criterion, RMSELoss):
+            # training metrics
+            self.train_acc = MeanSquaredError()
+            # validation metrics
+            self.val_acc = MeanSquaredError()
+        else:
+            # training metrics
+            self.train_acc = BinaryAccuracy()
+            # validation metrics
+            self.val_acc = BinaryAccuracy()
 
         # test metrics
         self.test_metrics = InferenceMetrics(threshold=threshold)
@@ -66,7 +73,10 @@ class DBGLightningModule(pl.LightningModule):
     def training_step(self, batch, batch_idx, dataloader_idx=0):
         scores, expected_scores = self.common_step(batch, batch_idx, dataloader_idx)
         loss = self.hparams.criterion(scores, expected_scores)
-        self.train_acc(torch.sigmoid(scores), expected_scores.int())
+        if isinstance(self.hparams.criterion, RMSELoss):
+            self.train_acc(scores, expected_scores.int())
+        else:
+            self.train_acc(torch.sigmoid(scores), expected_scores.int())
 
         self.log(
             "train/loss",
@@ -80,19 +90,24 @@ class DBGLightningModule(pl.LightningModule):
         return loss
 
     def on_train_epoch_end(self) -> None:
+        output = self.train_acc.compute()
         self.log(
             "train/acc",
-            self.train_acc,
+            output,
             on_epoch=True,
             prog_bar=True,
             logger=True,
             batch_size=self.batch_size,
         )
+        self.train_acc.reset()
 
     def validation_step(self, batch, batch_idx, dataloader_idx=0):
         scores, expected_scores = self.common_step(batch, batch_idx, dataloader_idx)
         loss = self.hparams.criterion(scores, expected_scores)
-        self.val_acc.update(torch.sigmoid(scores), expected_scores.int())
+        if isinstance(self.hparams.criterion, RMSELoss):
+            self.val_acc.update(scores, expected_scores.int())
+        else:
+            self.val_acc.update(torch.sigmoid(scores), expected_scores.int())
 
         self.log(
             "val/loss",
