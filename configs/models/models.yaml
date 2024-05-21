@@ -5,6 +5,7 @@ defaults:
 
 _target_: models.dbg_light_module.DBGLightningModule
 storage_path: #${paths.output_dir}
+offset: 0.5
 
 optimizer:
   _target_: torch.optim.Adam

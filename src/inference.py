@@ -1,5 +1,4 @@
 import json
-from typing import Optional
 
 import hydra
 import pytorch_lightning as pl
@@ -81,8 +80,8 @@ def infere(cfg: DictConfig) -> None:
     config_path=str(get_config_root()),
     config_name="inference_cfg.yaml",
 )
-def main(cfg: DictConfig) -> Optional[float]:
-    """Training script entry point.
+def main(cfg: DictConfig) -> None:
+    """Inference script entry point.
 
     Args:
         cfg (DictConfig): composed configuration
