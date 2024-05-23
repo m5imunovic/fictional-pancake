@@ -31,7 +31,7 @@ class DBGLightningModule(pl.LightningModule):
         self.net = net
         self.batch_size = batch_size
 
-        if isinstance(self.hparams.criterion, RMSELoss):
+        if self.regression_mode():
             # training metrics
             self.train_acc = MeanSquaredError()
             # validation metrics
@@ -73,7 +73,7 @@ class DBGLightningModule(pl.LightningModule):
     def training_step(self, batch, batch_idx, dataloader_idx=0):
         scores, expected_scores = self.common_step(batch, batch_idx, dataloader_idx)
         loss = self.hparams.criterion(scores, expected_scores)
-        if isinstance(self.hparams.criterion, RMSELoss):
+        if self.regression_mode():
             self.train_acc(scores, expected_scores.int())
         else:
             self.train_acc(torch.sigmoid(scores), expected_scores.int())
@@ -104,7 +104,7 @@ class DBGLightningModule(pl.LightningModule):
     def validation_step(self, batch, batch_idx, dataloader_idx=0):
         scores, expected_scores = self.common_step(batch, batch_idx, dataloader_idx)
         loss = self.hparams.criterion(scores, expected_scores)
-        if isinstance(self.hparams.criterion, RMSELoss):
+        if self.regression_mode():
             self.val_acc.update(scores, expected_scores.int())
         else:
             self.val_acc.update(torch.sigmoid(scores), expected_scores.int())
@@ -136,7 +136,7 @@ class DBGLightningModule(pl.LightningModule):
 
     def test_step(self, batch, batch_idx, dataloader_idx=0):
         scores, expected_scores = self.common_step(batch, batch_idx, dataloader_idx)
-        if isinstance(self.hparams.criterion, RMSELoss):
+        if self.regression_mode():
             # We define a hyperparameter offset which shifts the range to negative values
             # After that we will normalize with sigmoid so everything negative becomes "falsy"
             # This way we can still use metrics as for classification case
@@ -161,3 +161,6 @@ class DBGLightningModule(pl.LightningModule):
         scores, _ = self.common_step(batch, batch_idx, dataloader_idx)
         scores = torch.sigmoid(scores)
         return torch.round(scores)
+
+    def regression_mode(self):
+        return isinstance(self.hparams.criterion, RMSELoss) or isinstance(self.hparams.criterion, nn.PoissonNLLLoss)
