@@ -1,0 +1,4 @@
+_target_: torch.nn.PoissonNLLLoss
+log_input: false
+full: false
+reduce: mean
