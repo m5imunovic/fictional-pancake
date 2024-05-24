@@ -11,5 +11,3 @@ datamodules:
   num_clusters: 2
 
 baseline: E${trainer.max_epochs}_L${models.net.num_layers}_H${models.net.hidden_features}_C${datamodules.num_clusters}
-
-ckpt_path: null

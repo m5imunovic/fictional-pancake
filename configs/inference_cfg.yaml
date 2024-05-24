@@ -15,8 +15,10 @@ defaults:
 # task name, used as output directory path
 task_name: "inference"
 
-# checkpoint path, should rename it to differentiate training/inference
-ckpt_path: ${paths.storage_dir}/models/${baseline}/best_model.ckpt
+# Id of the model training task
+train_id: #
+# path of model to use for inference
+model_path: ${paths.storage_dir}/models/${baseline}/${train_id}/best_model.ckpt
 # dataset_name and baseline are defined in experiment
 loggers:
   wandb:

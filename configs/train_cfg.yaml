@@ -34,5 +34,6 @@ test: false
 
 # we can provide previously trained model here
 ckpt_path: null
+train_id: ${now:%y%m%d_%H%M}
 # dir where do we want to store the best model?
-model_output_path: ${paths.storage_dir}/models/${baseline}/
+model_output_path: ${paths.storage_dir}/models/${baseline}/${train_id}/

@@ -2,13 +2,7 @@ dataset_name: unittest_dataset
 
 baseline: E${trainer.max_epochs}_L${models.net.num_layers}_H${models.net.hidden_features}_C${datamodules.num_clusters}
 
-ckpt_path: ${paths.test_data_dir}/models/baseline/${baseline}/best_model.ckpt
+model_path: ${paths.test_data_dir}/models/baseline/${baseline}/best_model.ckpt
 
 models:
   threshold: 0.5
-# loggers:
-#   wandb:
-#     name: inference_${dataset_name}
-#     group: inference_${baseline}_T${models.threshold}
-#     tags: ["resgated_mdg", "unittest_dataset"]
-#     offline: False
