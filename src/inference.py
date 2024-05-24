@@ -1,4 +1,5 @@
 import json
+from pathlib import Path
 
 import hydra
 import pytorch_lightning as pl
@@ -50,6 +51,10 @@ def infere(cfg: DictConfig) -> None:
     if cfg.paths.data_dir is None:
         log.error("Paths data dir is not defined. Aborting!")
         return
+    model_path = cfg.model_path or None
+    if model_path is None or not Path(model_path).exists():
+        log.error("No model path provided.")
+        return
     log.info("Init data module...")
     datamodule: pl.LightningDataModule = hydra.utils.instantiate(cfg.datamodules)
     log.info("Init model...")
@@ -60,14 +65,11 @@ def infere(cfg: DictConfig) -> None:
     log.info("Init trainer/inference module...")
     trainer: pl.Trainer = hydra.utils.instantiate(cfg.trainer, logger=loggers)
 
-    log.info("Save experiment hyperparameters...")
+    # log.info("Save experiment hyperparameters...")
     # TODO: implement saving
 
     log.info("Start inference...")
-    ckpt_path = trainer.checkpoint_callback.best_model_path or cfg.ckpt_path or None
-    if ckpt_path is None:
-        raise ValueError("No checkpoint path provided.")
-    trainer.test(model=model, datamodule=datamodule, ckpt_path=ckpt_path)
+    trainer.test(model=model, datamodule=datamodule, ckpt_path=model_path)
     log.info("Save predictions...")
     # TODO: implement saving
 
