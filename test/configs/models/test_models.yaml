@@ -1,9 +1,11 @@
 defaults:
   - net: test_resgated_multidigraph
+  - criterion: test_focal_loss
   - _self_
 
 _target_: models.dbg_light_module.DBGLightningModule
 storage_path: null
+offset: 0.5
 
 optimizer:
   _target_: torch.optim.Adam
@@ -18,9 +20,3 @@ scheduler:
   factor: 0.95
   patience: 2
   min_lr: 1.e-6
-
-criterion:
-  _target_: models.loss.focal_loss.FocalLoss
-  alpha: 0.25
-  gamma: 2
-  reduction: mean
