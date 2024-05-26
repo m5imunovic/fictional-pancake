@@ -67,6 +67,8 @@ class DBGLightningModule(pl.LightningModule):
         y = batch.data.y
 
         scores = self.net(x=x.float(), edge_index=edge_index, edge_attr=edge_attr)
+        if self.regression_mode():
+            scores = torch.clamp(scores, min=0)
         expected_scores = y.float().unsqueeze(-1)
         return scores, expected_scores
 
