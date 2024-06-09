@@ -58,7 +58,7 @@ def infere(cfg: DictConfig) -> None:
         return
     if cfg.lja_mode:
         log.info("Converting LJA graph...")
-        lja_to_graph(cfg.datamodules.dataset_path, create_test_dir=True)
+        lja_to_graph(Path(cfg.datamodules.dataset_path), create_test_dir=True)
     log.info("Init data module...")
     datamodule: pl.LightningDataModule = hydra.utils.instantiate(cfg.datamodules)
     log.info("Init model...")
