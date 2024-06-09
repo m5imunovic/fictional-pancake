@@ -6,6 +6,7 @@ import pytorch_lightning as pl
 import torch
 from omegaconf import DictConfig, OmegaConf
 
+from data.lja_to_graph import lja_to_graph
 from utils.cfg_helpers import instantiate_component_list
 from utils.logger import get_logger
 from utils.path_helpers import get_config_root
@@ -53,8 +54,11 @@ def infere(cfg: DictConfig) -> None:
         return
     model_path = cfg.model_path or None
     if model_path is None or not Path(model_path).exists():
-        log.error("No model path provided.")
+        log.error(f"No model path {model_path} provided.")
         return
+    if cfg.lja_mode:
+        log.info("Converting LJA graph...")
+        lja_to_graph(cfg.datamodules.dataset_path, create_test_dir=True)
     log.info("Init data module...")
     datamodule: pl.LightningDataModule = hydra.utils.instantiate(cfg.datamodules)
     log.info("Init model...")

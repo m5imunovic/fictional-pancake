@@ -4,7 +4,7 @@ import torch
 from torch_geometric.data import Data
 
 
-def lja_to_graph(path: Path):
+def lja_to_graph(path: Path, create_test_dir: bool = False):
     assert path.exists(), f"Path {path} does not exist!"
     edge_index_path = path / "edge_index.pt"
     edge_attrs_path = path / "edge_attrs.pt"
@@ -20,6 +20,9 @@ def lja_to_graph(path: Path):
 
     # both edge index and attrs come in (len, 2) shape
     graph = Data(num_nodes=num_nodes, edge_index=edge_index.T, edge_attr=edge_attr)
+    if create_test_dir:
+        path = path / "test"
+        path.mkdir(parents=True, exist_ok=True)
     raw_dir = path / "raw"
     raw_dir.mkdir(parents=True, exist_ok=True)
     torch.save(graph, raw_dir / "0.pt")
