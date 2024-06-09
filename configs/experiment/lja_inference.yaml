@@ -1,0 +1,16 @@
+dataset_name: lja
+lja_mode: true
+
+trainer:
+  max_epochs: 40
+
+models:
+  net:
+    num_layers: 6
+    hidden_features: 16
+  threshold: 0.5
+
+datamodules:
+  num_clusters: 8
+
+baseline: E${trainer.max_epochs}_L${models.net.num_layers}_H${models.net.hidden_features}_C${datamodules.num_clusters}

@@ -15,3 +15,4 @@ defaults:
 
 # task name, used for logging dir name
 task_name: "unittest"
+lja_mode: false
