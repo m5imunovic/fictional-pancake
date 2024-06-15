@@ -39,6 +39,29 @@ def unittest_ds_path(unittest_ds_zip, tmp_path) -> Generator:
 
 
 @pytest.fixture(scope="function")
+def lja_data_path(test_data_path, tmp_path) -> Generator:
+    # dataset
+    datasets_path = tmp_path / "datasets"
+    lja_data_path = test_data_path / "lja_graph"
+    lja_tmp_path = datasets_path / "lja_graph"
+    lja_tmp_path.mkdir(parents=True)
+    shutil.copy(lja_data_path / "edge_index.pt", lja_tmp_path)
+    shutil.copy(lja_data_path / "edge_attrs.pt", lja_tmp_path)
+    shutil.copy(lja_data_path / "nodes.pt", lja_tmp_path)
+    # model
+    model_subpath = "models/regression/baseline/E2_L2_H16_C4"
+    regression_model_path = test_data_path / model_subpath / "best_model.ckpt"
+    tmp_model_path = tmp_path / "storage" / model_subpath
+    tmp_model_path.mkdir(parents=True)
+    # results
+    results_path = tmp_path / "storage/inference"
+    results_path.mkdir(parents=True)
+    shutil.copy(regression_model_path, tmp_model_path)
+    yield tmp_path
+    shutil.rmtree(tmp_path)
+
+
+@pytest.fixture(scope="function")
 def test_train_cfg(test_cfg_root, unittest_ds_path) -> DictConfig:
     data_dir = unittest_ds_path.parent.parent
     overrides = [f"paths.data_dir={data_dir}"]
@@ -66,6 +89,20 @@ def test_inference_cfg(test_cfg_root, unittest_ds_path) -> DictConfig:
     overrides = [f"paths.data_dir={data_dir}"]
     with initialize_config_dir(version_base=None, config_dir=str(test_cfg_root)):
         cfg = compose(config_name="test_inf_config.yaml", overrides=overrides, return_hydra_config=True)
+        return cfg
+
+
+@pytest.fixture(scope="function")
+def test_predict_cfg(test_cfg_root, lja_data_path) -> DictConfig:
+    data_dir = lja_data_path
+    overrides = [
+        f"paths.data_dir={data_dir}",
+        "models/criterion=test_poisson_loss",
+        f"models.storage_path={data_dir/'storage/inference'}",
+        "datamodules/transform=test_tf_pe_zscore",
+    ]
+    with initialize_config_dir(version_base=None, config_dir=str(test_cfg_root)):
+        cfg = compose(config_name="test_pred_config.yaml", overrides=overrides, return_hydra_config=True)
         return cfg
 
 

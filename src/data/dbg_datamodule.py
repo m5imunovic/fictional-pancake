@@ -84,4 +84,5 @@ class DBGDataModule(pl.LightningDataModule):
             self.test_ds,
             batch_size=self.hparams.batch_size,
             num_workers=self.hparams.num_workers,
+            collate_fn=datasample_collate_fn,
         )
