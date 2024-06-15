@@ -73,9 +73,12 @@ def infere(cfg: DictConfig) -> None:
     # TODO: implement saving
 
     log.info("Start inference...")
-    trainer.test(model=model, datamodule=datamodule, ckpt_path=model_path)
-    log.info("Save predictions...")
-    # TODO: implement saving
+    if cfg.lja_mode:
+        predictions = trainer.predict(model=model, datamodule=datamodule, ckpt_path=model_path)
+        log.info("Prediction finished.")
+        return predictions
+    else:
+        trainer.test(model=model, datamodule=datamodule, ckpt_path=model_path)
 
     log.info("Experiment finished.")
     return

@@ -64,12 +64,16 @@ class DBGLightningModule(pl.LightningModule):
         x = batch.data.x
         edge_index = batch.data.edge_index
         edge_attr = getattr(batch.data, "edge_attr", None)
-        y = batch.data.y
 
         scores = self.net(x=x.float(), edge_index=edge_index, edge_attr=edge_attr)
         if self.regression_mode():
             scores = torch.clamp(scores, min=0)
-        expected_scores = y.float().unsqueeze(-1)
+
+        if getattr(batch.data, "y") is not None:
+            y = batch.data.y
+            expected_scores = y.float().unsqueeze(-1)
+        else:
+            expected_scores = None
         return scores, expected_scores
 
     def training_step(self, batch, batch_idx, dataloader_idx=0):
@@ -161,8 +165,17 @@ class DBGLightningModule(pl.LightningModule):
 
     def predict_step(self, batch, batch_idx, dataloader_idx=0):
         scores, _ = self.common_step(batch, batch_idx, dataloader_idx)
-        scores = torch.sigmoid(scores)
-        return torch.round(scores)
+        if self.regression_mode():
+            # We define a hyperparameter offset which shifts the range to negative values
+            # After that we will normalize with sigmoid so everything negative becomes "falsy"
+            # This way we can still use metrics as for classification case
+            scores = scores - self.hparams.offset
+            scores = torch.clamp(scores, min=0)
+        else:
+            scores = torch.sigmoid(scores).reshape((1, -1))
+        if self.storage_path is not None:
+            torch.save(scores.cpu(), f"{self.storage_path}/{batch.path[0].stem}.pt")
+        return scores
 
     def regression_mode(self):
         return isinstance(self.hparams.criterion, RMSELoss) or isinstance(self.hparams.criterion, nn.PoissonNLLLoss)

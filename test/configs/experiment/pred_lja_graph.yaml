@@ -1,0 +1,8 @@
+dataset_name: lja_graph
+
+baseline: E${trainer.max_epochs}_L${models.net.num_layers}_H${models.net.hidden_features}_C${datamodules.num_clusters}
+
+model_path: ${paths.model_dir}/regression/baseline/${baseline}/best_model.ckpt
+
+models:
+  offset: 0.5
