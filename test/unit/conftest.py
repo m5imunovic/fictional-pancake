@@ -75,7 +75,7 @@ def test_train_regress_cfg(test_cfg_root, unittest_ds_path) -> DictConfig:
     data_dir = unittest_ds_path.parent.parent
     overrides = [
         f"paths.data_dir={data_dir}",
-        "models/criterion=test_poisson_loss",
+        "models=test_models_regression",
         "datamodules/transform=test_tf_pe_zscore",
     ]
     with initialize_config_dir(version_base=None, config_dir=str(test_cfg_root)):
