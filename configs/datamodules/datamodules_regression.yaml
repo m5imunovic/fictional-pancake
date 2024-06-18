@@ -1,0 +1,9 @@
+defaults:
+  - _self_
+  - transform: tf_pe_zscore.yaml
+
+_target_: data.dbg_datamodule.DBGDataModule
+dataset_path: ${paths.dataset_dir}/${dataset_name}
+batch_size: 1
+num_workers: 4
+num_clusters: 8
