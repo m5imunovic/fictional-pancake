@@ -16,7 +16,7 @@ class DBGRegressionModule(pl.LightningModule):
         scheduler: torch.optim.lr_scheduler.ReduceLROnPlateau,
         criterion: torch.nn.modules.loss._Loss,
         batch_size: int = 1,
-        offset: int = 0.5,  # in regression setting we use this to adapt range for softmax operation
+        threshold: int = 0.5,  # in regression setting we use this to adapt range for softmax operation
         storage_path: Path | None = None,
     ):
         super().__init__()
@@ -127,10 +127,10 @@ class DBGRegressionModule(pl.LightningModule):
 
     def test_step(self, batch, batch_idx, dataloader_idx=0):
         scores, expected_scores = self.common_step(batch, batch_idx, dataloader_idx)
-        # We define a hyperparameter offset which shifts the range to negative values
+        # We define a hyperparameter threshold (offset) which shifts the range to negative values
         # After that we will normalize with sigmoid so everything negative becomes "falsy"
         # This way we can still use metrics as for classification case
-        scores = scores - self.hparams.offset
+        scores = scores - self.hparams.threshold
         scores = scores.reshape((1, -1))
         expected_scores = expected_scores.reshape((1, -1))
         if self.storage_path is not None:
@@ -143,10 +143,10 @@ class DBGRegressionModule(pl.LightningModule):
 
     def predict_step(self, batch, batch_idx, dataloader_idx=0):
         scores, _ = self.common_step(batch, batch_idx, dataloader_idx)
-        # We define a hyperparameter offset which shifts the range to negative values
+        # We define a hyperparameter threshold (offset) which shifts the range to negative values
         # After that we will normalize with sigmoid so everything negative becomes "falsy"
         # This way we can still use metrics as for classification case
-        scores = scores - self.hparams.offset
+        scores = scores - self.hparams.threshold
         scores = torch.clamp(scores, min=0)
         if self.storage_path is not None:
             torch.save(scores.cpu(), f"{self.storage_path}/{batch.path[0].stem}.pt")

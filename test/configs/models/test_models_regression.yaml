@@ -5,7 +5,6 @@ defaults:
 
 _target_: models.dbg_regression_module.DBGRegressionModule
 storage_path: #${paths.output_dir}
-offset: 0.5
 
 optimizer:
   _target_: torch.optim.Adam
