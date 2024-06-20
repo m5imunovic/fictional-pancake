@@ -19,4 +19,4 @@ output_dir: ${hydra.runtime.output_dir}
 log_dir: ${paths.storage_dir}/logs
 
 # test data
-test_data_dir: ${paths.root_dir}/test/data/
+test_data_dir: ${paths.root_dir}/test/data

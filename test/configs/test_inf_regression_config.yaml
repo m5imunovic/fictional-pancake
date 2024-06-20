@@ -1,0 +1,18 @@
+# @package _global_
+
+# specify here default configuration
+# order of defaults determines the order in which configs override each other
+defaults:
+  - paths: test_paths.yaml
+  - hydra: test_hydra.yaml
+  - loggers: test_loggers.yaml
+  - callbacks: test_callbacks.yaml
+  - datamodules: test_datamodules.yaml
+  - models: test_models_regression.yaml
+  - trainer: test_trainer_gpu.yaml
+  - experiment@_here_: inf_regress_unittest
+  - _self_
+
+# task name, used for logging dir name
+task_name: "unittest"
+lja_mode: false
