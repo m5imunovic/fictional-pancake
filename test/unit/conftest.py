@@ -93,6 +93,19 @@ def test_inference_cfg(test_cfg_root, unittest_ds_path) -> DictConfig:
 
 
 @pytest.fixture(scope="function")
+def test_inference_regress_cfg(test_cfg_root, unittest_ds_path) -> DictConfig:
+    data_dir = unittest_ds_path.parent.parent
+    overrides = [
+        f"paths.data_dir={data_dir}",
+        f"models.storage_path={data_dir/'storage/inference'}",
+        "datamodules/transform=test_tf_pe_zscore",
+    ]
+    with initialize_config_dir(version_base=None, config_dir=str(test_cfg_root)):
+        cfg = compose(config_name="test_inf_regression_config.yaml", overrides=overrides, return_hydra_config=True)
+        return cfg
+
+
+@pytest.fixture(scope="function")
 def test_predict_cfg(test_cfg_root, lja_data_path) -> DictConfig:
     data_dir = lja_data_path
     overrides = [

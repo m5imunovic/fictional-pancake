@@ -1,10 +1,12 @@
 from pathlib import Path
+
 import numpy as np
 import pytorch_lightning as pl
 import torch
 import torch.nn as nn
 from torchmetrics.regression import MeanSquaredError
 
+from eval.inference_metrics import InferenceMetrics
 from models.loss.mixture_loss import MixtureLoss
 
 
@@ -31,7 +33,11 @@ class DBGRegressionModule(pl.LightningModule):
         self.val_metric = MeanSquaredError()
 
         # test metrics
-        self.storage_path = storage_path
+        self.test_metrics = InferenceMetrics(threshold=threshold)
+        self.storage_path = None
+        if storage_path is not None:
+            self.storage_path = Path(storage_path)
+            self.storage_path.mkdir(exist_ok=True, parents=True)
 
     def configure_optimizers(self) -> torch.optim.Optimizer:
         optimizer = self.hparams.optimizer(self.parameters())
@@ -127,29 +133,38 @@ class DBGRegressionModule(pl.LightningModule):
 
     def test_step(self, batch, batch_idx, dataloader_idx=0):
         scores, expected_scores = self.common_step(batch, batch_idx, dataloader_idx)
-        # We define a hyperparameter threshold (offset) which shifts the range to negative values
-        # After that we will normalize with sigmoid so everything negative becomes "falsy"
-        # This way we can still use metrics as for classification case
-        scores = scores - self.hparams.threshold
         scores = scores.reshape((1, -1))
         expected_scores = expected_scores.reshape((1, -1))
         if self.storage_path is not None:
-            np.save(f"{self.storage_path}/{batch.path[0].stem}", scores.cpu().numpy())
+            torch.save(scores.cpu(), f"{self.storage_path/batch.path[0].stem}.pt")
+            np.save(f"{self.storage_path/batch.path[0].stem}", scores.cpu().numpy())
             np.save(f"{self.storage_path}/expected_{batch.path[0].stem}", expected_scores.cpu().numpy())
             torch.save(batch.data, f"{self.storage_path}/transformed_{batch.path[0].stem}.pt")
 
+        # We define a hyperparameter threshold (offset) which shifts the range to negative values
+        # After that we will clamp so everything negative becomes "falsy"
+        # This way we can still use metrics as for classification case
+        scores = scores - self.hparams.threshold
+        scores_bin = torch.clamp(scores, 0).bool().long()
+        expected_scores_bin = expected_scores.bool().long()
+
+        self.test_metrics.update(scores_bin, expected_scores_bin, batch.path)
+
     def on_test_end(self):
-        return
+        df = self.test_metrics.finalize()
+        print(df.to_string())
+        if hasattr(self.logger, "log_table"):
+            self.logger.log_table("test/metrics", dataframe=df)
 
     def predict_step(self, batch, batch_idx, dataloader_idx=0):
         scores, _ = self.common_step(batch, batch_idx, dataloader_idx)
         # We define a hyperparameter threshold (offset) which shifts the range to negative values
-        # After that we will normalize with sigmoid so everything negative becomes "falsy"
+        # After that we will clamp so everything negative becomes "falsy"
         # This way we can still use metrics as for classification case
         scores = scores - self.hparams.threshold
         scores = torch.clamp(scores, min=0)
         if self.storage_path is not None:
-            torch.save(scores.cpu(), f"{self.storage_path}/{batch.path[0].stem}.pt")
+            torch.save(scores.cpu(), f"{self.storage_path/batch.path[0].stem}.pt")
         return scores
 
     def uses_mixture_loss(self):

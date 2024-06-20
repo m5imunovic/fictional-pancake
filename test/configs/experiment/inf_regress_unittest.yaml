@@ -1,0 +1,5 @@
+dataset_name: unittest_dataset
+
+baseline: E${trainer.max_epochs}_L${models.net.num_layers}_H${models.net.hidden_features}_C${datamodules.num_clusters}
+
+model_path: ${paths.test_data_dir}/models/regression/baseline/${baseline}/best_model.ckpt

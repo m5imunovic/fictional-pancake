@@ -1,4 +1,5 @@
 from pathlib import Path
+
 import numpy as np
 import pytorch_lightning as pl
 import torch
@@ -45,7 +46,10 @@ class DBGLightningModule(pl.LightningModule):
         # test metrics
         self.test_metrics = InferenceMetrics(threshold=threshold)
         self.cm = BinaryConfusionMatrix(threshold=threshold)
-        self.storage_path = storage_path
+        self.storage_path = None
+        if storage_path is not None:
+            self.storage_path = Path(storage_path)
+            self.storage_path.mkdir(exist_ok=True, parents=True)
 
     def configure_optimizers(self) -> torch.optim.Optimizer:
         optimizer = self.hparams.optimizer(self.parameters())
@@ -159,7 +163,6 @@ class DBGLightningModule(pl.LightningModule):
         self.cm(scores, expected_scores.int())
 
     def on_test_end(self):
-        return
         df = self.test_metrics.finalize()
         print(df.to_string())
         if hasattr(self.logger, "log_table"):
