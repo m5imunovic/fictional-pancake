@@ -8,10 +8,9 @@ from torchmetrics.classification import (
     BinaryAccuracy,
     BinaryConfusionMatrix,
 )
-from torchmetrics.regression import MeanSquaredError
 
 from eval.inference_metrics import InferenceMetrics
-from models.loss.rmse_loss import RMSELoss
+from utils.container import Container
 
 
 class DBGLightningModule(pl.LightningModule):
@@ -23,7 +22,6 @@ class DBGLightningModule(pl.LightningModule):
         criterion: torch.nn.modules.loss._Loss,
         batch_size: int = 1,
         threshold: float = 0.5,
-        offset: int = 0.5,  # in regression setting we use this to adapt range for softmax operation
         storage_path: Path | None = None,
     ):
         super().__init__()
@@ -32,16 +30,10 @@ class DBGLightningModule(pl.LightningModule):
         self.net = net
         self.batch_size = batch_size
 
-        if self.regression_mode():
-            # training metrics
-            self.train_acc = MeanSquaredError()
-            # validation metrics
-            self.val_acc = MeanSquaredError()
-        else:
-            # training metrics
-            self.train_acc = BinaryAccuracy()
-            # validation metrics
-            self.val_acc = BinaryAccuracy()
+        # training metrics
+        self.train_acc = BinaryAccuracy()
+        # validation metrics
+        self.val_acc = BinaryAccuracy()
 
         # test metrics
         self.test_metrics = InferenceMetrics(threshold=threshold)
@@ -70,8 +62,6 @@ class DBGLightningModule(pl.LightningModule):
         edge_attr = getattr(batch.data, "edge_attr", None)
 
         scores = self.net(x=x.float(), edge_index=edge_index, edge_attr=edge_attr)
-        if self.regression_mode():
-            scores = torch.clamp(scores, min=0)
 
         if getattr(batch.data, "y") is not None:
             y = batch.data.y
@@ -83,10 +73,7 @@ class DBGLightningModule(pl.LightningModule):
     def training_step(self, batch, batch_idx, dataloader_idx=0):
         scores, expected_scores = self.common_step(batch, batch_idx, dataloader_idx)
         loss = self.hparams.criterion(scores, expected_scores)
-        if self.regression_mode():
-            self.train_acc(scores, expected_scores.int())
-        else:
-            self.train_acc(torch.sigmoid(scores), expected_scores.int())
+        self.train_acc(torch.sigmoid(scores), expected_scores.int())
 
         self.log(
             "train/loss",
@@ -114,10 +101,7 @@ class DBGLightningModule(pl.LightningModule):
     def validation_step(self, batch, batch_idx, dataloader_idx=0):
         scores, expected_scores = self.common_step(batch, batch_idx, dataloader_idx)
         loss = self.hparams.criterion(scores, expected_scores)
-        if self.regression_mode():
-            self.val_acc.update(scores, expected_scores.int())
-        else:
-            self.val_acc.update(torch.sigmoid(scores), expected_scores.int())
+        self.val_acc.update(torch.sigmoid(scores), expected_scores.int())
 
         self.log(
             "val/loss",
@@ -146,13 +130,7 @@ class DBGLightningModule(pl.LightningModule):
 
     def test_step(self, batch, batch_idx, dataloader_idx=0):
         scores, expected_scores = self.common_step(batch, batch_idx, dataloader_idx)
-        if self.regression_mode():
-            # We define a hyperparameter offset which shifts the range to negative values
-            # After that we will normalize with sigmoid so everything negative becomes "falsy"
-            # This way we can still use metrics as for classification case
-            scores = scores - self.hparams.offset
-        else:
-            scores = torch.sigmoid(scores)
+        scores = torch.sigmoid(scores)
         scores = scores.reshape((1, -1))
         expected_scores = expected_scores.reshape((1, -1))
         if self.storage_path is not None:
@@ -171,17 +149,9 @@ class DBGLightningModule(pl.LightningModule):
 
     def predict_step(self, batch, batch_idx, dataloader_idx=0):
         scores, _ = self.common_step(batch, batch_idx, dataloader_idx)
-        if self.regression_mode():
-            # We define a hyperparameter offset which shifts the range to negative values
-            # After that we will normalize with sigmoid so everything negative becomes "falsy"
-            # This way we can still use metrics as for classification case
-            scores = scores - self.hparams.offset
-            scores = torch.clamp(scores, min=0)
-        else:
-            scores = torch.sigmoid(scores).reshape((1, -1))
+        scores = torch.sigmoid(scores).reshape((1, -1))
         if self.storage_path is not None:
+            container = Container({"edge_class": scores.cpu().to(torch.float32)})
+            container.save(self.storage_path)
             torch.save(scores.cpu(), f"{self.storage_path}/{batch.path[0].stem}.pt")
         return scores
-
-    def regression_mode(self):
-        return isinstance(self.hparams.criterion, RMSELoss) or isinstance(self.hparams.criterion, nn.PoissonNLLLoss)
