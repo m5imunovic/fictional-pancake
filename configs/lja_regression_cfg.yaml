@@ -6,21 +6,19 @@ defaults:
   - hydra: hydra.yaml
   - loggers: loggers.yaml
   - paths: paths.yaml
-  - datamodules: datamodules.yaml
-  - models: models.yaml
+  - datamodules: datamodules_regression.yaml
+  - models: models_regression.yaml
   - trainer: trainer.yaml
-  - experiment: null
+  - experiment: lja_inference.yaml
   - _self_
 
 # task name, used as output directory path
 task_name: "inference"
 
-lja_mode: false
+lja_mode: true
 
 # Id of the model training task
 train_id: #
-# path of model to use for inference
-model_path: ${paths.storage_dir}/models/${baseline}/${train_id}/best_model.ckpt
 # dataset_name and baseline are defined in experiment
 loggers:
   wandb:
