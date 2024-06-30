@@ -9,7 +9,7 @@ defaults:
   - datamodules: datamodules_regression.yaml
   - models: models_regression.yaml
   - trainer: trainer.yaml
-  - experiment: lja_inference.yaml
+  - experiment@_here_: lja_inference.yaml
   - _self_
 
 # task name, used as output directory path
