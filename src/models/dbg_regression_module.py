@@ -8,6 +8,7 @@ from torchmetrics.regression import MeanSquaredError
 
 from eval.inference_metrics import InferenceMetrics
 from models.loss.mixture_loss import MixtureLoss
+from utils.container import Container
 
 
 class DBGRegressionModule(pl.LightningModule):
@@ -164,6 +165,8 @@ class DBGRegressionModule(pl.LightningModule):
         scores = scores - self.hparams.threshold
         scores = torch.clamp(scores, min=0)
         if self.storage_path is not None:
+            container = Container({"multiplicity": scores.cpu().to(torch.float32)})
+            container.save(self.storage_path)
             torch.save(scores.cpu(), f"{self.storage_path/batch.path[0].stem}.pt")
         return scores
 
