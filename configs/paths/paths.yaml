@@ -17,3 +17,5 @@ model_dir: ${paths.storage_dir}/models
 output_dir: ${hydra:runtime.output_dir}
 # path to logging directory
 log_dir: ${paths.storage_dir}/logs
+# path to lja current dir
+lja_dir: ${paths.data_dir}
