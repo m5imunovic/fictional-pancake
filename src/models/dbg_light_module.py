@@ -151,7 +151,7 @@ class DBGLightningModule(pl.LightningModule):
         scores, _ = self.common_step(batch, batch_idx, dataloader_idx)
         scores = torch.sigmoid(scores).reshape((1, -1))
         if self.storage_path is not None:
-            container = Container({"edge_class": scores.cpu().to(torch.float32)})
+            container = Container({"probability": scores.cpu().to(torch.float32)})
             container.save(self.storage_path)
             torch.save(scores.cpu(), f"{self.storage_path}/{batch.path[0].stem}.pt")
         return scores

@@ -1,5 +1,4 @@
 dataset_name: lja
-lja_mode: true
 
 trainer:
   max_epochs: 40
