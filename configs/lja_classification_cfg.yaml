@@ -6,10 +6,10 @@ defaults:
   - hydra: hydra.yaml
   - loggers: loggers.yaml
   - paths: paths.yaml
-  - datamodules: datamodules_regression.yaml
-  - models: models_regression.yaml
+  - datamodules: datamodules.yaml
+  - models: models.yaml
   - trainer: trainer.yaml
-  - experiment@_here_: lja_exp_rinf.yaml
+  - experiment@_here_: lja_exp_cinf.yaml
   - _self_
 
 # task name, used as output directory path
