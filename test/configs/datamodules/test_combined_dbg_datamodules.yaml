@@ -1,0 +1,10 @@
+defaults:
+  - _self_
+  - datasets@train_datasets: test_concat_dataset_train.yaml
+  - datasets@val_datasets: test_concat_dataset_val.yaml
+  - transform: test_tf_pe_zscore_bin.yaml
+
+_target_: data.combined_dbg_datamodule.CombinedDBGDataModule
+batch_size: 1
+num_workers: 4
+shuffle: False
