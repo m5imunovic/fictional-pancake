@@ -29,12 +29,26 @@ def unittest_ds_zip(test_data_path) -> Path:
 
 
 @pytest.fixture(scope="function")
-def unittest_ds_path(unittest_ds_zip, tmp_path) -> Generator:
+def unittest_ds_path(unittest_ds_zip, tmp_path) -> Path:
     datasets_path = tmp_path / "datasets"
     with zipfile.ZipFile(unittest_ds_zip, "r") as zip_file:
         zip_file.extractall(datasets_path)
 
     yield datasets_path / "unittest_dataset"
+    shutil.rmtree(tmp_path)
+
+
+@pytest.fixture(scope="function")
+def unittest_ds_path_combined(unittest_ds_zip, tmp_path) -> tuple[Path, Path]:
+    datasets_path = tmp_path / "datasets"
+    with zipfile.ZipFile(unittest_ds_zip, "r") as zip_file:
+        zip_file.extractall(datasets_path)
+
+    path1 = datasets_path / "unittest_dataset"
+    path2 = datasets_path / "unittest_dataset_2"
+    shutil.copytree(path1, path2)
+
+    yield path1, path2
     shutil.rmtree(tmp_path)
 
 
@@ -71,12 +85,23 @@ def test_train_cfg(test_cfg_root, unittest_ds_path) -> DictConfig:
 
 
 @pytest.fixture(scope="function")
+def test_combined_train_cfg(test_cfg_root, unittest_ds_path_combined) -> DictConfig:
+    # there is a pair path
+    data_dir = unittest_ds_path_combined[0].parent.parent
+    overrides = [f"paths.data_dir={data_dir}"]
+    with initialize_config_dir(version_base=None, config_dir=str(test_cfg_root)):
+        cfg = compose(config_name="test_combined_train_config.yaml", overrides=overrides, return_hydra_config=True)
+        return cfg
+
+
+@pytest.fixture(scope="function")
 def test_train_regress_cfg(test_cfg_root, unittest_ds_path) -> DictConfig:
     data_dir = unittest_ds_path.parent.parent
     overrides = [
         f"paths.data_dir={data_dir}",
         "models=test_models_regression",
         "datamodules/transform=test_tf_pe_zscore",
+        "wandb_model_upload=true",
     ]
     with initialize_config_dir(version_base=None, config_dir=str(test_cfg_root)):
         cfg = compose(config_name="test_train_config.yaml", overrides=overrides, return_hydra_config=True)

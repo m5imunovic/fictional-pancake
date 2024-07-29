@@ -79,7 +79,8 @@ def train(cfg: DictConfig) -> None:
             if cfg.metadata:
                 metadata.update(dict(cfg.metadata))
 
-            upload_model_to_wandb(output_file_path, cfg.baseline, cfg.dataset_name, metadata=metadata)
+            if "wandb_model_upload" in cfg and cfg["wandb_model_upload"]:
+                upload_model_to_wandb(output_file_path, cfg.baseline, cfg.dataset_name, metadata=metadata)
 
     if cfg.get("test", False):
         log.info("Start testing...")

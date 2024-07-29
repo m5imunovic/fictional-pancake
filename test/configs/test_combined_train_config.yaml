@@ -1,0 +1,13 @@
+# @package _global_
+
+# specify here default configuration
+# order of defaults determines the order in which configs override each other
+defaults:
+  - test_train_config.yaml
+  - override datamodules: test_combined_dbg_datamodules.yaml
+  - _self_
+
+# task name, used for logging dir name
+task_name: "combined_unittest"
+dataset_name: "combined_dataset"
+baseline: E${trainer.max_epochs}_L${models.net.num_layers}_H${models.net.hidden_features}

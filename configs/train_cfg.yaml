@@ -37,3 +37,5 @@ ckpt_path: null
 train_id: ${now:%y%m%d%H%M}
 # dir where do we want to store the best model?
 model_output_path: ${paths.storage_dir}/models/${baseline}/${train_id}/
+
+wandb_model_upload: false

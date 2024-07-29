@@ -1,0 +1,9 @@
+_target_: torch.utils.data.dataset.ConcatDataset
+datasets:
+  - _target_: data.cluster_dbg_dataset.ClusteredDBGDataset
+    root: ${paths.data_dir}/datasets/unittest_dataset/train
+    transform: ${datamodules.transform}
+    num_clusters: 2
+  - _target_: data.dbg_dataset.DBGDataset
+    root: ${paths.data_dir}/datasets/unittest_dataset_2/train
+    transform: ${datamodules.transform}

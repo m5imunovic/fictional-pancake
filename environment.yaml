@@ -22,7 +22,7 @@ dependencies:
   - wandb
 
   # Math
-  - numpy
+  - numpy=1.26.4
   - scipy
 
   #Analysis
