@@ -23,7 +23,7 @@ torch.multiprocessing.set_start_method("spawn", force=True)
 def upload_model_to_wandb(model_path, artifact_name, dataset_name, metadata=None):
     log.info(f"Uploading model {model_path.name} to wandb.")
 
-    run = wandb.init(project=f"chm13-models-{dataset_name}", job_type="add-model")
+    run = wandb.init(project=f"dbg-models-{dataset_name}", job_type="add-model", mode="offline")
 
     artifact = wandb.Artifact(name=artifact_name, type="ml-model", incremental=True, metadata=metadata)
     artifact.add_file(local_path=model_path)
@@ -79,8 +79,7 @@ def train(cfg: DictConfig) -> None:
             if cfg.metadata:
                 metadata.update(dict(cfg.metadata))
 
-            if "wandb_model_upload" in cfg and cfg["wandb_model_upload"]:
-                upload_model_to_wandb(output_file_path, cfg.baseline, cfg.dataset_name, metadata=metadata)
+            upload_model_to_wandb(output_file_path, cfg.baseline, cfg.dataset_name, metadata=metadata)
 
     if cfg.get("test", False):
         log.info("Start testing...")

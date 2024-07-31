@@ -23,8 +23,7 @@ loggers:
   wandb:
     name: train_${dataset_name}
     group: train_${baseline}_T${models.threshold}
-    tags: ["resgated_mdg"]
-    offline: true
+    tags: ["resgated_mdg", "classification"]
 
 #use False to skip if we should only do the testing
 train: true
@@ -36,6 +35,4 @@ test: false
 ckpt_path: null
 train_id: ${now:%y%m%d%H%M}
 # dir where do we want to store the best model?
-model_output_path: ${paths.storage_dir}/models/${baseline}/${train_id}/
-
-wandb_model_upload: false
+model_output_path: ${paths.storage_dir}/models/class_models/${baseline}/${train_id}/

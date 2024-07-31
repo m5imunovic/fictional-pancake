@@ -23,6 +23,5 @@ train_id: #
 loggers:
   wandb:
     name: inference_${dataset_name}
-    group: inference_${baseline}_T${models.threshold}
+    group: inference_${baseline}
     tags: ["resgated_mdg"]
-    offline: true

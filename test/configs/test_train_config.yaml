@@ -15,4 +15,3 @@ defaults:
 
 # task name, used for logging dir name
 task_name: "unittest"
-wandb_model_upload: false
