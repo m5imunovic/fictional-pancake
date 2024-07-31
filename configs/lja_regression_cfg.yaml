@@ -25,4 +25,3 @@ loggers:
     name: inference_${dataset_name}
     group: inference_${baseline}_T${models.threshold}
     tags: ["resgated_mdg"]
-    offline: true

@@ -7,8 +7,8 @@ defaults:
   - loggers: loggers.yaml
   - paths: paths.yaml
   - callbacks: callbacks.yaml
-  - datamodules: datamodules_regression.yaml
-  - models: models_regression.yaml
+  - datamodules: combined_datamodules.yaml
+  - models: models.yaml
   - trainer: trainer_gpu.yaml
   - experiment: null
   - _self_
@@ -21,9 +21,9 @@ metadata:
 # dataset_name and baseline are defined in experiment config
 loggers:
   wandb:
-    name: train_r_${dataset_name}
-    group: train_r_${baseline}
-    tags: ["resgated_mdg", "regression"]
+    name: train_${dataset_name}
+    group: train_${baseline}
+    tags: ["resgated_mdg", "classification"]
 
 #use False to skip if we should only do the testing
 train: true
@@ -33,7 +33,6 @@ test: false
 
 # we can provide previously trained model here
 ckpt_path: null
-# unique identifier of trainining run
 train_id: ${now:%y%m%d%H%M}
 # dir where do we want to store the best model?
-model_output_path: ${paths.storage_dir}/models/regress_models/${baseline}/${train_id}/
+model_output_path: ${paths.storage_dir}/models/class_models/${baseline}/${train_id}/

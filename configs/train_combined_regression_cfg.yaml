@@ -7,7 +7,7 @@ defaults:
   - loggers: loggers.yaml
   - paths: paths.yaml
   - callbacks: callbacks.yaml
-  - datamodules: datamodules_regression.yaml
+  - datamodules: combined_datamodules.yaml
   - models: models_regression.yaml
   - trainer: trainer_gpu.yaml
   - experiment: null
@@ -23,7 +23,7 @@ loggers:
   wandb:
     name: train_r_${dataset_name}
     group: train_r_${baseline}
-    tags: ["resgated_mdg", "regression"]
+    tags: ["resgated_mdg", "combined_datasets", "regression"]
 
 #use False to skip if we should only do the testing
 train: true
