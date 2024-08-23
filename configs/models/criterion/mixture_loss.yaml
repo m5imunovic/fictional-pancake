@@ -1,3 +1,4 @@
 _target_: models.loss.mixture_loss.MixtureLoss
 alfa: 1.
+beta: 1.
 reduction: mean

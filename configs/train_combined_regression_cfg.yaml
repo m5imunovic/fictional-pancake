@@ -18,10 +18,12 @@ task_name: "train"
 metadata:
   graph: multidigraph
 
+# unique identifier of trainining run
+train_id: ${now:%y%m%d%H%M}
 # dataset_name and baseline are defined in experiment config
 loggers:
   wandb:
-    name: train_r_${dataset_name}
+    name: train_r_${dataset_name}_${train_id}
     group: train_r_${baseline}
     tags: ["resgated_mdg", "combined_datasets", "regression"]
 
@@ -33,7 +35,5 @@ test: false
 
 # we can provide previously trained model here
 ckpt_path: null
-# unique identifier of trainining run
-train_id: ${now:%y%m%d%H%M}
 # dir where do we want to store the best model?
 model_output_path: ${paths.storage_dir}/models/regress_models/${baseline}/${train_id}/

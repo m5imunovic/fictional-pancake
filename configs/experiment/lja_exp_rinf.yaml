@@ -1,12 +1,12 @@
 dataset_name: lja
 
 trainer:
-  max_epochs: 40
+  max_epochs: 150
 
 models:
   net:
-    num_layers: 6
-    hidden_features: 16
+    num_layers: 7
+    hidden_features: 32
   threshold: 0.5
   storage_path: ${paths.data_dir}
 
@@ -15,6 +15,6 @@ datamodules:
   dataset_path: ${paths.data_dir}
 
   # path of model to use for inference
-model_path: /tmp/models/best_model.ckpt
 
-baseline: E${trainer.max_epochs}_L${models.net.num_layers}_H${models.net.hidden_features}_C${datamodules.num_clusters}
+baseline: E${trainer.max_epochs}_L${models.net.num_layers}_H${models.net.hidden_features}
+model_path: ${paths.data_dir}/storage/models/regress_models/${baseline}/${train_id}/best_model.ckpt

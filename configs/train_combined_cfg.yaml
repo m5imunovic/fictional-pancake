@@ -19,9 +19,10 @@ metadata:
   graph: multidigraph
 
 # dataset_name and baseline are defined in experiment config
+train_id: ${now:%y%m%d%H%M}
 loggers:
   wandb:
-    name: train_${dataset_name}
+    name: train_${dataset_name}_${train_id}
     group: train_${baseline}
     tags: ["resgated_mdg", "classification"]
 
@@ -33,6 +34,5 @@ test: false
 
 # we can provide previously trained model here
 ckpt_path: null
-train_id: ${now:%y%m%d%H%M}
 # dir where do we want to store the best model?
 model_output_path: ${paths.storage_dir}/models/class_models/${baseline}/${train_id}/
