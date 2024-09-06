@@ -132,3 +132,6 @@ dmypy.json
 # Project stuff
 logs/**
 data/**
+apptainer/old
+outputs/**
+wandb/**
