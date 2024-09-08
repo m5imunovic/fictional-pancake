@@ -17,6 +17,6 @@ scheduler:
   _partial_: true
   mode: min
   factor: 0.95
-  patience: 2
+  patience: 10
   min_lr: 1.e-6
   verbose: True

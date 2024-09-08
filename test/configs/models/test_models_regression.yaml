@@ -4,7 +4,7 @@ defaults:
   - _self_
 
 _target_: models.dbg_regression_module.DBGRegressionModule
-storage_path: #${paths.output_dir}
+storage_path: #${paths.output_dir}/${train_id}/${dataset_name}
 
 optimizer:
   _target_: torch.optim.Adam

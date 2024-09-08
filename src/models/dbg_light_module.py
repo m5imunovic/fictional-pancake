@@ -111,7 +111,6 @@ class DBGLightningModule(pl.LightningModule):
             prog_bar=True,
             logger=True,
             batch_size=self.batch_size,
-            add_dataloader_idx=True,
         )
         return loss
 
@@ -124,7 +123,6 @@ class DBGLightningModule(pl.LightningModule):
             prog_bar=True,
             logger=True,
             batch_size=self.batch_size,
-            add_dataloader_idx=True,
         )
         self.val_acc.reset()
 
