@@ -115,7 +115,6 @@ class DBGRegressionModule(pl.LightningModule):
             prog_bar=True,
             logger=True,
             batch_size=self.batch_size,
-            add_dataloader_idx=True,
         )
         return loss
 
@@ -128,7 +127,6 @@ class DBGRegressionModule(pl.LightningModule):
             prog_bar=True,
             logger=True,
             batch_size=self.batch_size,
-            add_dataloader_idx=True,
         )
         self.val_metric.reset()
 
