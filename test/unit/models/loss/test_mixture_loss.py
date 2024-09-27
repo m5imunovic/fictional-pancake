@@ -40,3 +40,8 @@ def test_mixture_loss_sub(sample_subgraph):
     loss = MixtureLoss()
     result = loss(sample_subgraph.edge_index, pred, sample_subgraph.y)
     assert not torch.isclose(result, torch.tensor(0.0))
+
+
+def test_mixture_uses_huber_loss():
+    loss = MixtureLoss(base_loss="huber")
+    assert isinstance(loss.base_loss, torch.nn.HuberLoss)
