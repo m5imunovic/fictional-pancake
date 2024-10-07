@@ -12,16 +12,15 @@ class FlowLoss(torch.nn.Module):
         self.reduction = reduction
 
     def forward(self, edge_index: Tensor, y_hat: Tensor):
-        # from torch_scatter import scatter_add
-        # ingoing = scatter_add(coverage_pred, edge_index[0, :], dim_size=edge_index.shape[1])
-        # outgoing = scatter_add(coverage_pred, edge_index[1, :], dim_size=edge_index.shape[1])
-        in_zeros = torch.zeros_like(y_hat.squeeze(-1), requires_grad=True, dtype=torch.float)
-        out_zeros = torch.zeros_like(y_hat.squeeze(-1), requires_grad=True, dtype=torch.float)
-        ingoing = torch.scatter_add(in_zeros, -1, edge_index[0, :], y_hat.squeeze(-1).to(torch.float))
-        outgoing = torch.scatter_add(out_zeros, -1, edge_index[1, :], y_hat.squeeze(-1).to(torch.float))
+        assert edge_index.shape[0] == 2, "Edge index is not oriented properly"
+        num_nodes = edge_index.max().item() + 1
+        in_zeros = torch.zeros(num_nodes, requires_grad=True, dtype=torch.float).to(edge_index.device)
+        out_zeros = torch.zeros(num_nodes, requires_grad=True, dtype=torch.float).to(edge_index.device)
+        incoming = torch.scatter_add(in_zeros, -1, edge_index[1, :], y_hat.squeeze(-1).to(torch.float))
+        outgoing = torch.scatter_add(out_zeros, -1, edge_index[0, :], y_hat.squeeze(-1).to(torch.float))
 
         if self.reduction == "mean":
-            loss = torch.abs(ingoing - outgoing).mean()
+            loss = torch.abs(incoming - outgoing).mean()
         else:
-            loss = torch.abs(ingoing - outgoing).sum()
+            loss = torch.abs(incoming - outgoing).sum()
         return loss

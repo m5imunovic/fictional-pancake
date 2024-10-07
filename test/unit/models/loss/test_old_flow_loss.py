@@ -16,13 +16,10 @@ def test_flow():
     data = sample_graph()
 
     flow_loss = FlowLoss()
+    torch.ones_like(data.edge_attr)
     result = flow_loss(data.edge_index, data.edge_attr)
-    # IN | OUT
-    #  1 |   1
-    # 76 |  76
-    #  0 | -76
-    # 76 |   0
     assert result == 38
+    # TODO: add more test cases
 
 
 @pytest.fixture
@@ -58,8 +55,8 @@ def test_sum_reduction_large_graph(example_input):
     out_zeros = torch.zeros(10, dtype=torch.float)  # 10 nodes for outgoing flow
 
     # Compute ingoing and outgoing flow based on edges and predicted multiplicity
-    ingoing = torch.scatter_add(in_zeros, -1, edge_index[1, :], y_hat.squeeze(-1))
-    outgoing = torch.scatter_add(out_zeros, -1, edge_index[0, :], y_hat.squeeze(-1))
+    ingoing = torch.scatter_add(in_zeros, 0, edge_index[1, :], y_hat.squeeze(-1))
+    outgoing = torch.scatter_add(out_zeros, 0, edge_index[0, :], y_hat.squeeze(-1))
 
     expected_loss = torch.abs(ingoing - outgoing).sum()
 
