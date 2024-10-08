@@ -8,6 +8,7 @@ from torchmetrics.regression import MeanSquaredError
 
 from eval.inference_metrics import InferenceMetrics
 from models.loss.mixture_loss import MixtureLoss
+from models.unmark_weird_flow import unmark_weird_flow
 from utils.container import Container
 
 
@@ -21,6 +22,8 @@ class DBGRegressionModule(pl.LightningModule):
         batch_size: int = 1,
         threshold: int = 0.5,  # in regression setting we use this to adapt range for softmax operation
         storage_path: Path | None = None,
+        max_depth_flow: int | None = None,
+        min_odd_flow: float | None = None,
     ):
         super().__init__()
 
@@ -39,6 +42,11 @@ class DBGRegressionModule(pl.LightningModule):
         if storage_path is not None:
             self.storage_path = Path(storage_path)
             self.storage_path.mkdir(exist_ok=True, parents=True)
+
+        # in this case use heuristic to post trim multiplicities where flow is od
+        self.post_correct = max_depth_flow is not None and min_odd_flow is not None
+        self.max_depth_flow = max_depth_flow
+        self.min_odd_flow = min_odd_flow
 
     def configure_optimizers(self) -> torch.optim.Optimizer:
         optimizer = self.hparams.optimizer(self.parameters())
@@ -163,9 +171,16 @@ class DBGRegressionModule(pl.LightningModule):
         scores = scores - self.hparams.threshold
         scores = torch.clamp(scores, min=0)
         if self.storage_path is not None:
-            container = Container({"multiplicity": scores.cpu().to(torch.float32)})
-            container.save(self.storage_path)
             torch.save(scores.cpu(), f"{self.storage_path/batch.path[0].stem}.pt")
+            if self.post_correct:
+                edge_index = batch.data.edge_index
+                multiplicity = scores
+                scores, unmarked = unmark_weird_flow(edge_index, multiplicity, self.min_odd_flow, self.max_depth_flow)
+                container = Container({"multiplicity": scores.cpu().to(torch.float32)})
+                torch.save(unmarked.cpu(), f"{self.storage_path/batch.path[0].stem}_marked.pt")
+            else:
+                container = Container({"multiplicity": scores.cpu().to(torch.float32)})
+            container.save(self.storage_path)
         return scores
 
     def uses_mixture_loss(self):
