@@ -165,10 +165,6 @@ class DBGRegressionModule(pl.LightningModule):
 
     def predict_step(self, batch, batch_idx, dataloader_idx=0):
         scores, _ = self.common_step(batch, batch_idx, dataloader_idx)
-        # We define a hyperparameter threshold (offset) which shifts the range to negative values
-        # After that we will clamp so everything negative becomes "falsy"
-        # This way we can still use metrics as for classification case
-        scores = scores - self.hparams.threshold
         scores = torch.clamp(scores, min=0)
         if self.storage_path is not None:
             torch.save(scores.cpu(), f"{self.storage_path/batch.path[0].stem}.pt")

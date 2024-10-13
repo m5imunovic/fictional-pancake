@@ -13,9 +13,9 @@ def find_candidate_nodes(edge_index, multiplicity, flow_threshold):
     i_zeros = torch.zeros(num_nodes, dtype=torch.float).to(edge_index.device)
     o_zeros = torch.zeros(num_nodes, dtype=torch.float).to(edge_index.device)
 
-    assert edge_index.shape[1] == 2
-    incoming = torch.scatter_add(i_zeros, -1, edge_index[:, 1], multiplicity.squeeze(-1).to(torch.float))
-    outgoing = torch.scatter_add(o_zeros, -1, edge_index[:, 0], multiplicity.squeeze(-1).to(torch.float))
+    assert edge_index.shape[0] == 2
+    incoming = torch.scatter_add(i_zeros, -1, edge_index[1, :], multiplicity.squeeze(-1).to(torch.float))
+    outgoing = torch.scatter_add(o_zeros, -1, edge_index[0, :], multiplicity.squeeze(-1).to(torch.float))
 
     diff = torch.abs(incoming - outgoing)
     nbunch = (diff > flow_threshold).nonzero(as_tuple=True)[0]
@@ -27,7 +27,7 @@ def edge_index_to_adj(edge_index):
     adj_list_fw = defaultdict(list)
     adj_list_bw = defaultdict(list)
 
-    for idx, (src, dst) in enumerate(edge_index.tolist()):
+    for idx, (src, dst) in enumerate(edge_index.t().tolist()):
         adj_list_fw[src].append((dst, idx))
         adj_list_bw[dst].append((src, idx))
 

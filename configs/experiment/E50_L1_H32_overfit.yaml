@@ -1,0 +1,13 @@
+dataset_name: overfit_bed_chm13
+
+trainer:
+  max_epochs: 50
+
+models:
+  net:
+    num_layers: 1
+    hidden_features: 32
+  storage_path: ${paths.data_dir}/analysis/inference/${train_id}/${dataset_name}
+
+baseline: E${trainer.max_epochs}_L${models.net.num_layers}_H${models.net.hidden_features}
+model_path: ${paths.data_dir}/storage/models/class_models/${baseline}/${train_id}/best_model.ckpt

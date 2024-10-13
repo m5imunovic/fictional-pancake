@@ -14,4 +14,4 @@ log_every_n_steps: 3
 check_val_every_n_epoch: 1
 
 # set True to to ensure deterministic results
-deterministic: False
+deterministic: True

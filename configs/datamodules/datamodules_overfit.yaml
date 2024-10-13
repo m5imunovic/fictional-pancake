@@ -1,0 +1,9 @@
+defaults:
+  - _self_
+  - datasets@train_datasets: overfit_dataset_train.yaml
+  - datasets@val_datasets: overfit_dataset_val.yaml
+  - transform: tf_node_all_ones.yaml
+
+_target_: data.combined_dbg_datamodule.CombinedDBGDataModule
+batch_size: 1
+num_workers: 1
