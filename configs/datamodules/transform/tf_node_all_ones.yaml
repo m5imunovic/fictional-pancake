@@ -1,0 +1,3 @@
+_target_: torch_geometric.transforms.compose.Compose
+transforms:
+  - _target_: transforms.node_all_ones.NodeAllOnes

@@ -1,0 +1,5 @@
+_target_: torch.utils.data.dataset.ConcatDataset
+datasets:
+  - _target_: data.dbg_dataset.DBGDataset
+    root: ${paths.dataset_dir}/overfit_bed_chm13/val
+    transform: ${datamodules.transform}

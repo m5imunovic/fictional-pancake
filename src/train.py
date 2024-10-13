@@ -42,6 +42,9 @@ def train(cfg: DictConfig) -> None:
         cfg (DictConfig): Configurations for training
     """
     start = datetime.now()
+    seed = cfg.get("seed", 10101)
+    pl.seed_everything(seed, workers=True)
+
     log.info("Init data module...")
     datamodule: pl.LightningDataModule = hydra.utils.instantiate(cfg.datamodules)
     log.info("Init model...")

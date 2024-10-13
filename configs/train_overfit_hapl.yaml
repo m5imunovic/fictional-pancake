@@ -1,0 +1,41 @@
+# @package _global_
+
+# specify here default configuration
+# order of defaults determines the order in which configs override each other
+defaults:
+  - hydra: hydra.yaml
+  - loggers: loggers.yaml
+  - paths: paths.yaml
+  - callbacks: callbacks.yaml
+  - datamodules: datamodules_overfit.yaml
+  - models: models_overfit.yaml
+  - trainer: trainer_gpu.yaml
+  - experiment@_here_: E50_L1_H32_overfit.yaml
+  - _self_
+
+seed: 501
+# task name, used as output directory path
+task_name: "train"
+metadata:
+  graph: multidigraph
+
+# unique identifier of trainining run
+train_id: ${now:%y%m%d%H%M}
+# dataset_name and baseline are defined in experiment config
+loggers:
+  wandb:
+    project: "dbg-ec-overfit"
+    name: train_r_${dataset_name}_${train_id}
+    group: train_r_${baseline}
+    tags: ["resgated_mdg", "overfit_chm13", "regression", "huber_loss"]
+
+#use False to skip if we should only do the testing
+train: true
+
+# evaluation on the test data
+test: false
+
+# we can provide previously trained model here
+ckpt_path: null
+# dir where do we want to store the best model?
+model_output_path: ${paths.storage_dir}/models/regress_models/${baseline}/${train_id}/

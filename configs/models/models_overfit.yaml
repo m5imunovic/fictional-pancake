@@ -1,0 +1,23 @@
+defaults:
+  - net: resgated_multidigraph_overfit
+  - criterion: huber_loss
+  - _self_
+
+_target_: models.dbg_regression_module.DBGRegressionModule
+storage_path: #${paths.output_dir}
+threshold: 0.5
+
+optimizer:
+  _target_: torch.optim.Adam
+  _partial_: true
+  lr: 0.003
+  weight_decay: 0.0
+
+scheduler:
+  _target_: torch.optim.lr_scheduler.ReduceLROnPlateau
+  _partial_: true
+  mode: min
+  factor: 0.95
+  patience: 10
+  min_lr: 1.e-6
+  verbose: True

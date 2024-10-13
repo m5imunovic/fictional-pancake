@@ -1,0 +1,5 @@
+_target_: models.net.resgated_multidigraph.ResGatedMultiDiGraphNet
+num_layers: 1
+node_features: 1
+edge_features: 2
+hidden_features: 32

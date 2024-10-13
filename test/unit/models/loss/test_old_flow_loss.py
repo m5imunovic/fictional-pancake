@@ -2,7 +2,7 @@ import pytest
 import torch
 from torch_geometric.data import Data
 
-from models.loss.flow_loss import FlowLoss
+from models.loss.old_flow_loss import FlowLoss
 
 
 def sample_graph() -> Data:
@@ -28,14 +28,14 @@ def example_input():
     # Each column in edge_index represents an edge from source node to target node.
     edge_index = torch.tensor(
         [
-            [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9],
-            [1, 2, 3, 4, 5, 6, 7, 8, 9, 0, 2, 3, 4, 5, 6, 7, 8, 9, 0, 1],
+            [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 5],
+            [1, 2, 3, 4, 5, 6, 7, 8, 9, 0, 2, 3, 4, 5, 6, 7, 8, 9, 0, 1, 8],
         ],
         dtype=torch.long,
     )
 
     # Predicted multiplicity values (y_hat) for each edge
-    y_hat = torch.rand(20, 1, dtype=torch.float)
+    y_hat = torch.rand(21, 1, dtype=torch.float)
 
     return edge_index, y_hat
 
@@ -55,8 +55,9 @@ def test_sum_reduction_large_graph(example_input):
     out_zeros = torch.zeros(10, dtype=torch.float)  # 10 nodes for outgoing flow
 
     # Compute ingoing and outgoing flow based on edges and predicted multiplicity
-    ingoing = torch.scatter_add(in_zeros, 0, edge_index[1, :], y_hat.squeeze(-1))
-    outgoing = torch.scatter_add(out_zeros, 0, edge_index[0, :], y_hat.squeeze(-1))
+    ingoing = torch.scatter_add(in_zeros, -1, edge_index[1, :], y_hat.squeeze(-1))
+    outgoing = torch.scatter_add(out_zeros, -1, edge_index[0, :], y_hat.squeeze(-1))
+    # print(ingoing, outgoing)
 
     expected_loss = torch.abs(ingoing - outgoing).sum()
 
