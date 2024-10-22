@@ -3,3 +3,4 @@ num_layers: 1
 node_features: 1
 edge_features: 2
 hidden_features: 32
+gate: bidirect # or unidirect

@@ -164,7 +164,8 @@ def sign_transform():
 @pytest.fixture
 def resgated_mdg_transform(test_cfg_root):
     transforms_path = test_cfg_root / "datamodules" / "transform"
+    overrides = ["transforms.0.walk_length=2"]
     with initialize_config_dir(version_base=None, config_dir=str(transforms_path)):
-        cfg = compose("test_transform_multidigraph.yaml")
+        cfg = compose("test_transform_multidigraph.yaml", overrides=overrides)
         transform = hydra.utils.instantiate(cfg)
         return transform
