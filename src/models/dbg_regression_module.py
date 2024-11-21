@@ -37,7 +37,7 @@ class DBGRegressionModule(pl.LightningModule):
         self.val_metric = MeanSquaredError()
 
         # test metrics
-        self.test_metrics = InferenceMetrics(threshold=threshold)
+        self.test_metrics = InferenceMetrics(threshold=0.5)
         self.storage_path = None
         if storage_path is not None:
             self.storage_path = Path(storage_path)
@@ -78,10 +78,17 @@ class DBGRegressionModule(pl.LightningModule):
 
     def training_step(self, batch, batch_idx, dataloader_idx=0):
         scores, expected_scores = self.common_step(batch, batch_idx, dataloader_idx)
+
         if self.uses_mixture_loss():
             loss = self.hparams.criterion(batch.data.edge_index, scores, expected_scores)
         else:
-            loss = self.hparams.criterion(scores, expected_scores)
+            weights = None
+            if getattr(batch.data, "weights") is not None:
+                weights = batch.data.weights.unsqueeze(-1)
+            if weights is not None:
+                loss = self.hparams.criterion(scores, expected_scores, weights)
+            else:
+                loss = self.hparams.criterion(scores, expected_scores)
         self.train_metric(scores, expected_scores.int())
 
         self.log(

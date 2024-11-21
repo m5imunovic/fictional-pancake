@@ -1,0 +1,3 @@
+_target_: models.loss.weighted_huber_loss.WeightedHuberLoss
+delta: 1.0
+reduction: "mean"
