@@ -119,7 +119,13 @@ class DBGRegressionModule(pl.LightningModule):
         if self.uses_mixture_loss():
             loss = self.hparams.criterion(batch.data.edge_index, scores, expected_scores)
         else:
-            loss = self.hparams.criterion(scores, expected_scores)
+            weights = None
+            if getattr(batch.data, "weights") is not None:
+                weights = batch.data.weights.unsqueeze(-1)
+            if weights is not None:
+                loss = self.hparams.criterion(scores, expected_scores, weights)
+            else:
+                loss = self.hparams.criterion(scores, expected_scores)
         self.val_metric.update(scores, expected_scores.int())
 
         self.log(

@@ -13,7 +13,7 @@ class WeightedHuberLoss(nn.Module):
         if reduction not in ["mean", "sum"]:
             raise NotImplementedError(f"Not implemented reduction method {self.reduction}")
         self.reduction = reduction
-        self.criterion = nn.HuberLoss(delta=delta, reduction=None)
+        self.criterion = nn.HuberLoss(delta=delta, reduction="none")
 
     def forward(self, input: torch.Tensor, target: torch.Tensor, weights: torch.Tensor):
         loss = self.criterion(input, target)
