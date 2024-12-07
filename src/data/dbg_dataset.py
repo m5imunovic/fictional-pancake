@@ -43,7 +43,7 @@ class DBGDataset(Dataset):
         path = self.raw_file_names[idx]
         if len(self.processed_file_names) > 0:
             path = self.processed_file_names[idx]
-        data = torch.load(path)
+        data = torch.load(path, weights_only=False)
         data = data if self.transform is None else self.transform(data)
         return DataSample(data, path)
 
