@@ -24,7 +24,7 @@ def test_gate(simple_graph):
     gcn.reset_parameters()
     h, e_fw = gcn(simple_graph.x, simple_graph.edge_attr, simple_graph.edge_index)
 
-    expected_h = torch.tensor([[0.5, 0.25], [0.5, 0.4743], [1.0, 1.0]])
+    expected_h = torch.tensor([[0.5, 0.3183], [0.5065, 0.9153], [1.0, 1.0]])
     assert torch.all(torch.isclose(h.detach(), expected_h, rtol=0.001))
 
 

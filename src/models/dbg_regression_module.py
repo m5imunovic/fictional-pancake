@@ -83,7 +83,7 @@ class DBGRegressionModule(pl.LightningModule):
             loss = self.hparams.criterion(batch.data.edge_index, scores, expected_scores)
         else:
             weights = None
-            if getattr(batch.data, "weights") is not None:
+            if getattr(batch.data, "weights", None) is not None:
                 weights = batch.data.weights.unsqueeze(-1)
             if weights is not None:
                 loss = self.hparams.criterion(scores, expected_scores, weights)
@@ -120,7 +120,7 @@ class DBGRegressionModule(pl.LightningModule):
             loss = self.hparams.criterion(batch.data.edge_index, scores, expected_scores)
         else:
             weights = None
-            if getattr(batch.data, "weights") is not None:
+            if getattr(batch.data, "weights", None) is not None:
                 weights = batch.data.weights.unsqueeze(-1)
             if weights is not None:
                 loss = self.hparams.criterion(scores, expected_scores, weights)
