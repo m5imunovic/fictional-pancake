@@ -1,3 +1,0 @@
-_target_: torch_geometric.transforms.compose.Compose
-transforms:
-  - _target_: transforms.node_stats.NodeStats
