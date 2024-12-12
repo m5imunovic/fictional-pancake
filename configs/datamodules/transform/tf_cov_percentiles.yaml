@@ -1,0 +1,4 @@
+_target_: torch_geometric.transforms.compose.Compose
+transforms:
+  - _target_: transforms.cov_percentiles.CovPercentiles
+    percentiles: [0.5]
