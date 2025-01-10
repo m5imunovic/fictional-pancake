@@ -60,8 +60,9 @@ class DBGLightningModule(pl.LightningModule):
         x = batch.data.x
         edge_index = batch.data.edge_index
         edge_attr = getattr(batch.data, "edge_attr", None)
+        graph_attr = getattr(batch.data, "graph_attr", None)
 
-        scores = self.net(x=x.float(), edge_index=edge_index, edge_attr=edge_attr)
+        scores = self.net(x=x.float(), edge_index=edge_index, edge_attr=edge_attr, graph_attr=graph_attr)
 
         if getattr(batch.data, "y") is not None:
             y = batch.data.y
