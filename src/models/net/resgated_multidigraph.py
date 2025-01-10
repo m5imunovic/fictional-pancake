@@ -12,14 +12,20 @@ class ResGatedMultiDiGraphNet(nn.Module):
         node_features: int,
         edge_features: int,
         hidden_features: int,
+        graph_features: int = -1,
         gate: str = "bidirect",
     ):
         super().__init__()
+
+        self.graph_features = graph_features
 
         self.W11 = nn.Linear(node_features, hidden_features, bias=True)
         self.W12 = nn.Linear(hidden_features, hidden_features, bias=True)
         self.W21 = nn.Linear(edge_features, hidden_features, bias=True)
         self.W22 = nn.Linear(hidden_features, hidden_features, bias=True)
+        if self.graph_features > 0:
+            self.W31 = nn.Linear(graph_features, hidden_features, bias=True)
+            self.W32 = nn.Linear(hidden_features, hidden_features, bias=True)
 
         self.gate = LayeredGatedGCN(num_layers=num_layers, hidden_features=hidden_features, gate=gate)
         self.ln1 = nn.LayerNorm(hidden_features)
@@ -27,12 +33,17 @@ class ResGatedMultiDiGraphNet(nn.Module):
 
         # TODO: check if increasing capacity or adding dropout here helps
         self.scorer1 = nn.Linear(3 * hidden_features, hidden_features, bias=True)
-        self.scorer2 = nn.Linear(hidden_features, out_features=1, bias=True)
-        self.scorer = nn.Linear(3 * hidden_features, out_features=1, bias=True)
+        if self.graph_features > 0:
+            scorer2_features = 2 * hidden_features
+        else:
+            scorer2_features = hidden_features
 
+        self.scorer2 = nn.Linear(scorer2_features, out_features=1, bias=True)
+        # this is unnecessary but removing it requires modification of tests
+        self.scorer = nn.Linear(3 * hidden_features, out_features=1, bias=True)
         self.reset_parameters()
 
-    def forward(self, x, edge_attr, edge_index) -> Tensor:
+    def forward(self, x, edge_attr, edge_index, graph_attr) -> Tensor:
         h = self.W12(torch.relu(self.W11(x)))
         e = self.W22(torch.relu(self.W21(edge_attr)))
 
@@ -41,6 +52,12 @@ class ResGatedMultiDiGraphNet(nn.Module):
         src, dst = edge_index
         score = self.scorer1(torch.cat(([h[src], h[dst], e]), dim=1))
         score = torch.relu(score)
+        if self.graph_features > 0:
+            g = self.W32(torch.relu(self.W31(graph_attr)))
+            num_edges = edge_attr.shape[0]
+            features = g.repeat(num_edges, 1)
+            score = torch.cat([score, features], dim=1)
+
         score = self.scorer2(score)
         score = torch.clamp(score, min=0)
 
@@ -154,14 +171,14 @@ class GatedGCN(MessagePassing):
             self.ln_h = nn.LayerNorm(hidden_features)
             self.ln_e = nn.LayerNorm(hidden_features)
 
-        def reset_parameters(self):
-            super().reset_parameters()
-            self.A1.reset_parameters()
-            self.A2.reset_parameters()
-            self.A3.reset_parameters()
-            self.B1.reset_parameters()
-            self.B2.reset_parameters()
-            self.B3.reset_parameters()
+    def reset_parameters(self):
+        super().reset_parameters()
+        self.A1.reset_parameters()
+        self.A2.reset_parameters()
+        self.A3.reset_parameters()
+        self.B1.reset_parameters()
+        self.B2.reset_parameters()
+        self.B3.reset_parameters()
 
     def forward(self, h, edge_attr, edge_index):
         A1h = self.A1(h)
