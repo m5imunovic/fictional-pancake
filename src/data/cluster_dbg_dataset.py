@@ -63,7 +63,7 @@ class ClusteredDBGDataset(Dataset):
         path = self.processed_file_names[idx]
         data = torch.load(path)
         data = data if self.transform is None else self.transform(data)
-        return DataSample(data, path)
+        return DataSample(data, path, [data.edge_index.shape[1]])
 
     def __getitem__(self, idx) -> DataSample:
         data = self.get(self.indices()[idx])

@@ -43,4 +43,5 @@ def test_with_graph_attr(simple_graph):
     # for now just test the data flow works
     g = CovPercentiles(percentiles=[0.25, 0.75])(simple_graph)
     net = ResGatedMultiDiGraphNet(num_layers=1, node_features=2, edge_features=2, hidden_features=10, graph_features=2)
-    _ = net.forward(g.x, g.edge_attr, g.edge_index, g.graph_attr)
+    ei_ptr = torch.tensor([simple_graph.edge_index.shape[1]])
+    _ = net.forward(g.x, g.edge_attr, g.edge_index, g.graph_attr, ei_ptr=ei_ptr)

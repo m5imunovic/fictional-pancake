@@ -113,7 +113,8 @@ def test_train_regress_batch_cfg(test_cfg_root, unittest_ds_path) -> DictConfig:
     overrides = [
         f"paths.data_dir={data_dir}",
         "models=test_models_regression",
-        "datamodules/transform=test_tf_pe_zscore",
+        "models.net.graph_features=2",
+        "datamodules/transform=test_tf_pe_cov_zscore",
         "datamodules.batch_size=2",
     ]
     with initialize_config_dir(version_base=None, config_dir=str(test_cfg_root)):
