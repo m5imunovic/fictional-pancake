@@ -43,7 +43,7 @@ class ResGatedMultiDiGraphNet(nn.Module):
         self.scorer = nn.Linear(3 * hidden_features, out_features=1, bias=True)
         self.reset_parameters()
 
-    def forward(self, x, edge_attr, edge_index, graph_attr) -> Tensor:
+    def forward(self, x, edge_attr, edge_index, graph_attr, ei_ptr=None) -> Tensor:
         h = self.W12(torch.relu(self.W11(x)))
         e = self.W22(torch.relu(self.W21(edge_attr)))
 
@@ -53,9 +53,9 @@ class ResGatedMultiDiGraphNet(nn.Module):
         score = self.scorer1(torch.cat(([h[src], h[dst], e]), dim=1))
         score = torch.relu(score)
         if self.graph_features > 0:
+            repeat_interleave = ei_ptr
             g = self.W32(torch.relu(self.W31(graph_attr)))
-            num_edges = edge_attr.shape[0]
-            features = g.repeat(num_edges, 1)
+            features = g.repeat_interleave(repeat_interleave, dim=0)
             score = torch.cat([score, features], dim=1)
 
         score = self.scorer2(score)

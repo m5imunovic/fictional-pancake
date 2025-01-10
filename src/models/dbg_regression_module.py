@@ -56,10 +56,12 @@ class DBGRegressionModule(pl.LightningModule):
     def common_step(self, batch, batch_idx, dataloader_idx=0):
         x = batch.data.x
         edge_index = batch.data.edge_index
+        device = edge_index.device
         edge_attr = getattr(batch.data, "edge_attr", None)
         graph_attr = getattr(batch.data, "graph_attr", None)
+        ei_ptr = torch.tensor(batch.ei_ptr, device=device)
 
-        scores = self.net(x=x.float(), edge_index=edge_index, edge_attr=edge_attr, graph_attr=graph_attr)
+        scores = self.net(x=x.float(), edge_index=edge_index, edge_attr=edge_attr, graph_attr=graph_attr, ei_ptr=ei_ptr)
         # scores = torch.clamp(scores, min=0)
 
         if getattr(batch.data, "y") is not None:

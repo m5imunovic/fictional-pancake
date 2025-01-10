@@ -14,7 +14,7 @@ class CombinedDBGDataModule(pl.LightningDataModule):
         train_datasets: Concatenated datasets for model training round
         val_datasets: Concatenated datasets for model validation round
         shuffle: Should we shuffle the training data, validation is not shuffled for evaluation consistency
-        batch_size: Size of a batch, required to be one for now, I haven't tested with more as we have big datasets
+        batch_size: Size of a batch
         num_workers: Number of workers to load the dataset in memory
         transform: Transformation placeholder, this is actually already used by hydra interpolation in configuration
         for conactedated datasets, we only need to keep it here not to break initialization.
@@ -32,7 +32,6 @@ class CombinedDBGDataModule(pl.LightningDataModule):
         super().__init__()
 
         self.batch_size = batch_size
-        assert batch_size == 1, "For now we don't handle bigger (>1) batch sizes"
         self.shuffle = shuffle
         self.num_workers = num_workers
 
