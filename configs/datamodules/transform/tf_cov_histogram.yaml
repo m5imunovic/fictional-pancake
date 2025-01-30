@@ -1,0 +1,5 @@
+_target_: torch_geometric.transforms.compose.Compose
+transforms:
+  - _target_: transforms.cov_histogram.CovHistogram
+    extend: 5
+    use_range: False
