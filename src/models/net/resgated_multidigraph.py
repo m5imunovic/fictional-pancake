@@ -59,7 +59,6 @@ class ResGatedMultiDiGraphNet(nn.Module):
             score = torch.cat([score, features], dim=1)
 
         score = self.scorer2(score)
-        score = torch.clamp(score, min=0)
 
         return score
 
