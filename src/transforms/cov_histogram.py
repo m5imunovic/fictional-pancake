@@ -20,5 +20,5 @@ class CovHistogram(BaseTransform):
         start_idx = max_index - self.extend + 1
         end_idx = max_index + self.extend
         selected_bins = bins[start_idx : end_idx + 1]
-        data.graph_attr = selected_bins
+        data.graph_attr = selected_bins.unsqueeze(0)
         return data
