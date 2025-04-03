@@ -47,3 +47,6 @@ apptainer run \
         --config-path /data/config \
         --config-name "train.yaml" \
 ```
+
+Datasets for training and tests are available at [Zenodo](https://doi.org/10.5281/zenodo.15073168), along with the
+sample configurations.
