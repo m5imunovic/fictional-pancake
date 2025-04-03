@@ -26,7 +26,7 @@ pre-commit run --all-files
 
 ## Training
 
-For training, we recommend setting up singularity image, script assume that the project is > \[!IMPORTANT\]
+For training, we recommend setting up singularity image, script assume that the project is located in
 `~/work/gnndebugger`
 
 ```Bash
