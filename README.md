@@ -1,21 +1,21 @@
-# fictional-pancake
+# GnnDebugger
 
-# Installation
+## Installation and development
 
 We recommend the usage of mambaforge for setting up Python environment:
 
 https://github.com/conda-forge/miniforge#mambaforge
 
 ```Bash
-## Install conda
+### Install conda
 mamba init
 
-## Create new environment (named menv)
+### Create new environment (named menv)
 mamba env create --file=environment.yaml
 mamba activate menv
 ```
 
-## Setup pre-commit hooks
+### Setup pre-commit hooks
 
 ```bash
 pip install pre-commit
@@ -24,25 +24,26 @@ pre-commit install
 pre-commit run --all-files
 ```
 
-## Run experiment
+## Training
 
-In order to run specific experiment override the experiment value accordingly:
+For training, we recommend setting up singularity image, script assume that the project is > \[!IMPORTANT\]
+`~/work/gnndebugger`
 
 ```Bash
-# Resgated model working with directed graph data
-PROJECT_ROOT=./ python src/train.py experiment=exp_resgated_digraph
-# Resgated model working with multidirected graph data
-PROJECT_ROOT=./ python src/train.py experiment=exp_resgated_multidigraph
-# SIGN model working with directed graph data
-PROJECT_ROOT=./ python src/train.py experiment=exp_sign_digraph
+cd apptainer && bash build_apptainer.sh
 ```
 
-## Transform data
+Configs should be modified according to the local paths (check `config/paths/paths.yaml`)
+Default data directory is `/data`.
+Datasets are expected in `/data/datasets` directory.
+Place configuration in `/data/configs` directory.
 
-Usually, we want to transform data before the experiments. `dataset_name` option must match the name
-of the dataset directory with graph data for transformation. Then you can run the following command:
+This will build image `dbgc.sif` which can then be used for training. Place the training
 
-```bash
-# Transform multidigraph data using default transformations
-PROJECT_ROOT=./ python src/transform.py graph=multidigraph dataset_name=random_species_10_01
+```Bash
+apptainer run \
+        --bind $HOME/data:/data \
+        --nv $HOME/work/gnndebugger/dbgc.sif \
+        --config-path /data/config \
+        --config-name "train.yaml" \
 ```

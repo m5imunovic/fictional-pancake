@@ -9,7 +9,7 @@ defaults:
   - datamodules: datamodules.yaml
   - models: models.yaml
   - trainer: trainer.yaml
-  - experiment: null
+  - experiment@_here_: E200_L7_H32
   - _self_
 
 # task name, used as output directory path
@@ -18,9 +18,8 @@ task_name: "inference"
 lja_mode: false
 
 # Id of the model training task
-train_id: #
-# path of model to use for inference
-model_path: ${paths.storage_dir}/models/${baseline}/${train_id}/best_model.ckpt
+train_id: 2408210508
+#train_id: 2408211341
 # dataset_name and baseline are defined in experiment
 loggers:
   wandb:

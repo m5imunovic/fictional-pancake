@@ -1,3 +1,4 @@
+import json
 from pathlib import Path
 
 import numpy as np
@@ -11,6 +12,31 @@ from models.loss.mixture_loss import MixtureLoss
 from utils.container import Container
 
 
+def postprocess_scores(data, scores, high=None, low=None, mincov=None):
+    if mincov is not None:
+        print("Filtering false positives")
+        maybe_fp_mask = torch.logical_and(scores < 0.95, data.edge_attr[:, 0].unsqueeze(-1) < mincov)
+        # print(f"{maybe_fp_mask.shape}, {maybe_fp_mask.shape}")
+        scores[maybe_fp_mask] = 0.0
+        print("After coverage filtering")
+        print(f"Corrections: {maybe_fp_mask.squeeze(-1).nonzero().numel()}")
+        print(f"{scores.shape=}")
+    if high is not None and low is not None:
+        print("Multiedge Corrections")
+        mult_mask = data.edge_attr[:, -1].unsqueeze(-1)
+        print(f"{mult_mask.shape=}")
+        maybe_fn_mask = torch.logical_and(scores >= low, scores <= high)
+        print(f"{maybe_fn_mask.shape=}")
+        maybe_mult_fn_mask = torch.logical_and(mult_mask, maybe_fn_mask)
+        print(f"Numel: {maybe_mult_fn_mask.squeeze(-1).nonzero().numel()}")
+        cov_gt3_mask = data.edge_attr[:, 0].unsqueeze(-1) > mincov
+        maybe_mult_fn_mask = torch.logical_and(maybe_mult_fn_mask, cov_gt3_mask)
+        print(f"Numel: {maybe_mult_fn_mask.squeeze(-1).nonzero().numel()}")
+        scores[maybe_mult_fn_mask] = 1.0
+
+    return scores
+
+
 class DBGRegressionModule(pl.LightningModule):
     def __init__(
         self,
@@ -21,11 +47,19 @@ class DBGRegressionModule(pl.LightningModule):
         batch_size: int = 1,
         threshold: int = 0.5,  # in regression setting we use this to adapt range for softmax operation
         storage_path: Path | None = None,
+        postprocess: bool = True,
+        high: float = None,
+        low: float = None,
+        mincov: float = None,
     ):
         super().__init__()
 
         self.save_hyperparameters(ignore=["net"], logger=False)
         self.net = net
+        self.postprocess = postprocess
+        self.high = high
+        self.low = low
+        self.mincov = mincov
         self.batch_size = batch_size
 
         # training metrics
@@ -34,7 +68,7 @@ class DBGRegressionModule(pl.LightningModule):
         self.val_metric = MeanSquaredError()
 
         # test metrics
-        self.test_metrics = InferenceMetrics(threshold=0.5)
+        self.test_metrics = InferenceMetrics(threshold=self.hparams.threshold)
         self.storage_path = None
         if storage_path is not None:
             self.storage_path = Path(storage_path)
@@ -69,6 +103,8 @@ class DBGRegressionModule(pl.LightningModule):
             expected_scores = y.float().unsqueeze(-1)
         else:
             expected_scores = None
+        if self.postprocess:
+            scores = postprocess_scores(batch.data, scores, high=self.high, low=self.low, mincov=self.mincov)
         return scores, expected_scores
 
     def training_step(self, batch, batch_idx, dataloader_idx=0):
@@ -156,20 +192,27 @@ class DBGRegressionModule(pl.LightningModule):
             np.save(f"{self.storage_path}/expected_{batch.path[0].stem}", expected_scores.cpu().numpy())
             torch.save(batch.data, f"{self.storage_path}/transformed_{batch.path[0].stem}.pt")
 
-        # We define a hyperparameter threshold (offset) which shifts the range to negative values
-        # After that we will clamp so everything negative becomes "falsy"
-        # This way we can still use metrics as for classification case
-        scores = scores - self.hparams.threshold
-        scores_bin = torch.clamp(scores, 0).bool().long()
-        expected_scores_bin = expected_scores.bool().long()
-
-        self.test_metrics.update(scores_bin, expected_scores_bin, batch.path)
+        self.test_metrics.update(scores, expected_scores, batch.path)
 
     def on_test_end(self):
-        df = self.test_metrics.finalize()
+        df = self.test_metrics.finalize(self.storage_path)
         print(df.to_string())
         if hasattr(self.logger, "log_table"):
             self.logger.log_table("test/metrics", dataframe=df)
+
+        if self.storage_path is not None and self.batch_size == 1:
+            outdir = self.storage_path / "stats"
+            outdir.mkdir(exist_ok=True, parents=True)
+            with open(outdir / "stats.csv", "w") as f:
+                df = df.sort_values(by=["Name"], ascending=True)
+                df.to_csv(f, index=False)
+
+            cfg = {
+                "postprocess": self.postprocess,
+                "mincov": self.mincov,
+            }
+            with open(outdir / "cfg.json", "w") as f:
+                json.dump(cfg, f)
 
     def predict_step(self, batch, batch_idx, dataloader_idx=0):
         scores, _ = self.common_step(batch, batch_idx, dataloader_idx)
@@ -178,6 +221,7 @@ class DBGRegressionModule(pl.LightningModule):
         if self.storage_path is not None:
             if self.batch_size == 1:
                 torch.save(scores.cpu(), f"{self.storage_path/batch.path[0].stem}.pt")
+                torch.save(batch.data, f"{self.storage_path}/transformed_{batch.path[0].stem}.pt")
             container = Container({"multiplicity": scores.cpu().to(torch.float32)})
             container.save(self.storage_path)
         return scores

@@ -11,6 +11,15 @@ class FlowLoss(torch.nn.Module):
             raise NotImplementedError(f"Not implemented reduction method {self.reduction}")
         self.reduction = reduction
 
+    def flow(self, edge_index: Tensor, y_hat: Tensor):
+        assert edge_index.shape[0] == 2, "Edge index is not oriented properly"
+        num_nodes = edge_index.max().item() + 1
+        in_zeros = torch.zeros(num_nodes, requires_grad=True, dtype=torch.float).to(edge_index.device)
+        out_zeros = torch.zeros(num_nodes, requires_grad=True, dtype=torch.float).to(edge_index.device)
+        incoming = torch.scatter_add(in_zeros, -1, edge_index[1, :], y_hat.squeeze(-1).to(torch.float))
+        outgoing = torch.scatter_add(out_zeros, -1, edge_index[0, :], y_hat.squeeze(-1).to(torch.float))
+        return incoming, outgoing
+
     def forward(self, edge_index: Tensor, y_hat: Tensor):
         assert edge_index.shape[0] == 2, "Edge index is not oriented properly"
         num_nodes = edge_index.max().item() + 1

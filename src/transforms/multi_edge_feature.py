@@ -11,6 +11,7 @@ class MultiEdgeFeature(BaseTransform):
     def forward(self, data):
         edge_index, edge_attr = data.edge_index, data.edge_attr
         _, inverse, counts = torch.unique(edge_index, dim=-1, return_inverse=True, return_counts=True)
+        # convert boolean to float as every other feature is also float
         edge_mask = (counts > 1).float()
         edge_mask_full = edge_mask[inverse].unsqueeze(-1)
 

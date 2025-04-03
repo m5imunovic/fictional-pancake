@@ -32,7 +32,7 @@ Do not forget to remove the `test.sandbox` in the end as it takes lots of storag
 rm -rf test.sandbox
 ```
 
-The build assumes that the `PROJECT_ROOT` is located at "$HOME/work/fictional-pancake"
+The build assumes that the `PROJECT_ROOT` is located at "$HOME/work/gnndebugger"
 To run, for example training
 
 ```Bash
