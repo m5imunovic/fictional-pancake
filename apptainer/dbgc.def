@@ -2,18 +2,19 @@ Bootstrap: docker
 From: nvidia/cuda:12.1.0-devel-ubuntu22.04
 
 %files
-    $HOME/work/fictional-pancake/ /work/
+    $HOME/work/gnndebugger /work/
 
 %post
     apt update -y
     apt autoremove -y
-    DEBIAN_FRONTEND=noninteractive apt install -y python3.11 python3.11-venv vim git curl
+    DEBIAN_FRONTEND=noninteractive apt install -y vim git curl #python3.11 python3.11-venv vim git curl
     DEBIAN_FRONTEND=noninteractive TZ="Europe/Berlin" apt install -y tzdata
     curl -L -O "https://github.com/conda-forge/miniforge/releases/latest/download/Miniforge3-$(uname)-$(uname -m).sh"
     bash Miniforge3-$(uname)-$(uname -m).sh -b
-    /root/miniforge3/bin/mamba env create --file=/work/fictional-pancake/environment.yaml
-    /root/miniforge3/bin/mamba init
 
+    /root/miniforge3/bin/mamba env create --file=/work/gnndebugger/environment.yaml
+
+    mkdir -p /data
     mkdir -p /work
     # clear warnings
     touch /etc/environment
@@ -28,16 +29,16 @@ From: nvidia/cuda:12.1.0-devel-ubuntu22.04
 
 %environment
     export LC_ALL=C
-    export PYTHONPATH="$HOME/work/fictional-pancake/src"
-    export PROJECT_ROOT="$HOME/work/fictional-pancake"
-    export WANDB_DIR="$HOME/data"
-    export PATH="/root/miniforge3/bin:$PATH"
+    export PYTHONPATH="/work/gnndebugger/src"
+    export PROJECT_ROOT="/work/gnndebugger"
+    export WANDB_DIR="/data"
+    export PATH="/root/miniforge3/bin/envs/fenv:$PATH"
 
 %runscript
     cd $PROJECT_ROOT
-    mamba run -n fenv python3 $@
+    /root/miniforge3/bin/mamba run -n fenv python3 src/train.py $@
     #python3 $@
 
 %labels
     Author m5imunovic
-    Version v0.0.2
+    Version v0.0.3
